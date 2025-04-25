@@ -4,6 +4,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -60,6 +63,40 @@ public class SessionManager implements Listener {
         var uuid = event.getPlayer().getUniqueId();
         if (sessions.containsKey(uuid)) {
             this.endSession(uuid, sessions.get(uuid));
+        }
+    }
+
+    private void information(List<Integer> intervals) {
+
+        // Moyenne
+        double average = intervals.stream().mapToInt(Integer::intValue).average().orElse(0);
+
+        // Écart type
+        double variance = intervals.stream()
+                .mapToDouble(i -> Math.pow(i - average, 2))
+                .average()
+                .orElse(0);
+        double standardDeviation = Math.sqrt(variance);
+
+        // Médiane
+        double median = calculateMedian(intervals);
+
+        // Affichage
+        var logger = plugin.getLogger();
+        logger.info("Moyenne: %.2f ms" + average);
+        logger.info("Médiane: %.2f ms" + median);
+        logger.info("Écart type: %.2f ms" + standardDeviation);
+    }
+
+    private double calculateMedian(List<Integer> data) {
+        List<Integer> sorted = new ArrayList<>(data);
+        Collections.sort(sorted);
+        int middle = sorted.size() / 2;
+
+        if (sorted.size() % 2 == 0) {
+            return (sorted.get(middle - 1) + sorted.get(middle)) / 2.0;
+        } else {
+            return sorted.get(middle);
         }
     }
 }

@@ -2,14 +2,19 @@ package fr.maxlego08.autoclick;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import fr.maxlego08.autoclick.command.CommandManager;
+import fr.maxlego08.autoclick.command.commands.CommandAntiAutoClick;
 import fr.maxlego08.autoclick.storage.StorageManager;
+import fr.maxlego08.autoclick.zcore.ZPlugin;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
-import org.bukkit.plugin.java.JavaPlugin;
 
-public final class ClickPlugin extends JavaPlugin {
+import java.util.List;
+
+public final class ClickPlugin extends ZPlugin {
 
     private final StorageManager storageManager = new StorageManager(this);
     private final SessionManager sessionManager = new SessionManager(this);
+    private final CommandManager commandManager = new CommandManager(this);
 
     @Override
     public void onLoad() {
@@ -29,6 +34,10 @@ public final class ClickPlugin extends JavaPlugin {
 
         this.storageManager.loadDatabase();
         this.getServer().getPluginManager().registerEvents(this.sessionManager, this);
+
+        this.commandManager.registerCommand(this, "zantiautoclicks", new CommandAntiAutoClick(this), List.of("zaac"));
+
+        commandManager.validCommands();
     }
 
     @Override
@@ -42,5 +51,13 @@ public final class ClickPlugin extends JavaPlugin {
 
     public SessionManager getSessionManager() {
         return sessionManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    public void reloadFiles() {
+        this.reloadConfig();
     }
 }

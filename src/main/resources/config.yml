@@ -1,5 +1,8 @@
+# Debug dans la console
+debug: false
+
 # Permet de debug SQL
-sql-debug: true
+sql-debug: false
 
 # Si le clic est trop rapide, on ne va pas le prendre en compte (500ms).
 minimum-delay: 500
