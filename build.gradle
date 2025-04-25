@@ -1,9 +1,16 @@
 plugins {
     id 'java'
+    id 'io.github.goooler.shadow' version '8.1.8'
 }
 
 group = 'fr.maxlego08.autoclick'
 version = '1.0.0'
+
+
+project.ext {
+    javaVersion = 21
+    targetFolder = file('target/')
+}
 
 repositories {
     mavenCentral()
@@ -15,12 +22,17 @@ repositories {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT")
     compileOnly("com.github.retrooper:packetevents-spigot:2.7.0")
+    implementation 'com.github.Maxlego08:Sarah:1.17'
 }
 
 def targetJavaVersion = 21
@@ -49,3 +61,14 @@ processResources {
         expand props
     }
 }
+
+shadowJar {
+    dependsOn(jar)
+
+    relocate 'fr.maxlego08.sarah', 'fr.maxlego08.quests.libs.sarah'
+
+    archiveFileName = rootProject.name + "-" + rootProject.version + ".jar"
+    destinationDirectory = rootProject.targetFolder
+}
+
+build.finalizedBy(shadowJar)

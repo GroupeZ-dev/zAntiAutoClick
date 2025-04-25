@@ -1,6 +1,9 @@
+# Permet de debug SQL
+sql-debug: true
+
 # Si le clic est trop rapide, on ne va pas le prendre en compte (500ms).
 minimum-delay: 500
 
-# Fin de la session (1000ms).
+# Fin de la session (50 ticks, 2.5s).
 # Permet de mettre fin à la session de clic sur joueur pour une analyse postérieure.
-session-end-after: 1000
+session-end-after: 50

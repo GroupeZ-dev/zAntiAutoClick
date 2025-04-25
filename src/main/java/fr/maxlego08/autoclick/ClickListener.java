@@ -8,12 +8,9 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientIn
 public class ClickListener implements PacketListener {
 
     private final ClickPlugin plugin;
-    private final int minimumDelay;
-    long lastClick = 0;
 
     public ClickListener(ClickPlugin plugin) {
         this.plugin = plugin;
-        this.minimumDelay = plugin.getConfig().getInt("minimum-delay");
     }
 
     @Override
@@ -26,15 +23,6 @@ public class ClickListener implements PacketListener {
         var wrapper = new WrapperPlayClientInteractEntity(event);
         if (wrapper.getAction() != WrapperPlayClientInteractEntity.InteractAction.ATTACK) return;
 
-        long now = System.currentTimeMillis();
-        if (lastClick != 0) {
-            long time = now - lastClick;
-
-            // Si le click est assez lent pour être log
-            if (time >= this.minimumDelay) {
-                System.out.println("La différence entre les deux clicks : " + time);
-            }
-        }
-        lastClick = now;
+        this.plugin.getSessionManager().onClick(event.getUser().getUUID());
     }
 }
