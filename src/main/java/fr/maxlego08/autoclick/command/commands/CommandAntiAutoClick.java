@@ -11,6 +11,7 @@ public class CommandAntiAutoClick extends VCommand {
         super(plugin);
         this.setPermission(Permission.ZANTIAUTOCLICK_USE);
         this.addSubCommand(new CommandAntiAutoClickReload(plugin));
+        this.addSubCommand(new CommandAntiAutoClickShow(plugin));
     }
 
     @Override

@@ -4,6 +4,7 @@ public enum Permission {
 
     ZANTIAUTOCLICK_USE,
     ZANTIAUTOCLICK_RELOAD,
+    ZANTIAUTOCLICK_SHOW,
 
     ;
 

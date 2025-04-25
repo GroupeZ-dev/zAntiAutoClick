@@ -21,8 +21,9 @@ public enum Message {
     RELOAD("&aYou have just reloaded the configuration files."),
 
     DESCRIPTION_RELOAD("Reload configuration files"),
+    DESCRIPTION_SHOW("Display a session"),
 
-    ;
+    SESSION_NOT_FOUND("&cImpossible to find the session &f%id%&c.");
 
     private List<String> messages;
     private String message;
@@ -44,11 +45,11 @@ public enum Message {
     /**
      * Constructs a new Message with the specified title, subtitle, and timings.
      *
-     * @param title     the title string.
-     * @param subTitle  the subtitle string.
-     * @param a         the start time in ticks.
-     * @param b         the display time in ticks.
-     * @param c         the end time in ticks.
+     * @param title    the title string.
+     * @param subTitle the subtitle string.
+     * @param a        the start time in ticks.
+     * @param b        the display time in ticks.
+     * @param c        the end time in ticks.
      */
     Message(String title, String subTitle, int a, int b, int c) {
         this.use = true;

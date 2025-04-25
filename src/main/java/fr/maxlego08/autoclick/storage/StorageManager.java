@@ -3,6 +3,7 @@ package fr.maxlego08.autoclick.storage;
 import fr.maxlego08.autoclick.ClickPlugin;
 import fr.maxlego08.autoclick.Session;
 import fr.maxlego08.autoclick.migrations.SessionMigration;
+import fr.maxlego08.autoclick.storage.dto.SessionDTO;
 import fr.maxlego08.sarah.DatabaseConfiguration;
 import fr.maxlego08.sarah.MigrationManager;
 import fr.maxlego08.sarah.RequestHelper;
@@ -13,6 +14,7 @@ import org.bukkit.Bukkit;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class StorageManager {
@@ -51,4 +53,10 @@ public class StorageManager {
         }));
     }
 
+    public void select(int id, Consumer<SessionDTO> consumer) {
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            var values = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.where("id", id));
+            consumer.accept(values.isEmpty() ? null : values.getFirst());
+        });
+    }
 }

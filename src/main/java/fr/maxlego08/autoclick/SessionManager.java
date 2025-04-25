@@ -1,5 +1,6 @@
 package fr.maxlego08.autoclick;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -66,7 +67,7 @@ public class SessionManager implements Listener {
         }
     }
 
-    private void information(List<Integer> intervals) {
+    public void information(CommandSender sender, List<Integer> intervals) {
 
         // Moyenne
         double average = intervals.stream().mapToInt(Integer::intValue).average().orElse(0);
@@ -82,10 +83,9 @@ public class SessionManager implements Listener {
         double median = calculateMedian(intervals);
 
         // Affichage
-        var logger = plugin.getLogger();
-        logger.info("Moyenne: %.2f ms" + average);
-        logger.info("Médiane: %.2f ms" + median);
-        logger.info("Écart type: %.2f ms" + standardDeviation);
+        sender.sendMessage(String.format("Moyenne: %.2f ms", average));
+        sender.sendMessage(String.format("Médiane: %.2f ms", median));
+        sender.sendMessage(String.format("Écart type: %.2f ms", standardDeviation));
     }
 
     private double calculateMedian(List<Integer> data) {
