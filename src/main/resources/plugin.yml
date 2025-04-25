@@ -1,0 +1,9 @@
+name: zAntiAutoClick
+version: '1.0.0'
+main: fr.maxlego08.autoclick.ClickPlugin
+api-version: '1.21'
+authors: [ Maxlego08 ]
+description: Anti Auto Click
+website: https://groupez.dev/
+depends:
+  - packetevents
