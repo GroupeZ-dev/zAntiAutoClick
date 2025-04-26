@@ -24,6 +24,7 @@ public enum Message {
     DESCRIPTION_SHOW("Display a session"),
     DESCRIPTION_SHOW_ALL("Display all sessions"),
     DESCRIPTION_CLEAN("Clean your database"),
+    DESCRIPTION_SUSPECT("Display suspect sessions"),
 
     SESSION_NOT_FOUND("&cImpossible to find the session &f%id%&c."),
     CLEAN("&aThe database has been cleaned."),

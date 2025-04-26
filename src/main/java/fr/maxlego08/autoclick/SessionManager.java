@@ -75,7 +75,7 @@ public class SessionManager extends ZUtils implements Listener {
         }
     }
 
-    public void information(CommandSender sender, ClickSession session) {
+    public void information(CommandSender sender, ClickSession session, boolean sendIfClean) {
 
         List<Integer> intervals = session.getDifferences();
         long duration = session.getDuration();
@@ -85,7 +85,7 @@ public class SessionManager extends ZUtils implements Listener {
 
         // Retirer les 5% les plus bas et les 5% les plus hauts
         int size = sorted.size();
-        int removeCount = (int) (size * 0.05);
+        int removeCount = (int) (size * Config.removePercent);
         List<Integer> trimmed = sorted.subList(removeCount, size - removeCount);
 
         // Moyenne
@@ -97,6 +97,8 @@ public class SessionManager extends ZUtils implements Listener {
                 .average()
                 .orElse(0);
         double standardDeviation = Math.sqrt(variance);
+
+        if (standardDeviation >= Config.sessionIsNormal && !sendIfClean) return;
 
         // Médiane
         double median = calculateMedian(trimmed);
@@ -122,10 +124,15 @@ public class SessionManager extends ZUtils implements Listener {
 
 
     public void showAll(CommandSender sender) {
-        this.plugin.getStorageManager().select(sessions -> {
+        this.plugin.getStorageManager().select(sessions -> sessions.forEach(e -> this.information(sender, e, true)));
+    }
 
+    public void sendSuspect(CommandSender sender, long seconds, boolean sendIfClean) {
+        this.plugin.getStorageManager().select(sessions -> {
             for (SessionDTO session : sessions) {
-                this.information(sender, session);
+                if (session.getDuration() >= seconds * 1000) {
+                    this.information(sender, session, sendIfClean);
+                }
             }
         });
     }

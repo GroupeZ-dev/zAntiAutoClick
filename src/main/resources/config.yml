@@ -16,3 +16,9 @@ minimum-session-duration: 60000 # 60 secondes
 
 # Nombre de clics minimum dans la session
 minimum-session-clicks: 40
+
+# On supprime le 5% les plus hauts et les plus bas
+remove-percent: 0.05
+
+# Si une session a un écart type inférieur ou égal à 20.0, alors le joueur est suspect.
+session-is-normal: 20.0
