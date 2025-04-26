@@ -10,9 +10,9 @@ import fr.maxlego08.sarah.RequestHelper;
 import fr.maxlego08.sarah.SqliteConnection;
 import fr.maxlego08.sarah.database.DatabaseType;
 import fr.maxlego08.sarah.logger.JULogger;
-import org.bukkit.Bukkit;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -45,7 +45,7 @@ public class StorageManager {
     }
 
     public void insertSession(UUID uuid, Session session) {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> this.requestHelper.insert(Tables.SESSIONS, table -> {
+        this.async(() -> this.requestHelper.insert(Tables.SESSIONS, table -> {
             table.uuid("unique_id", uuid);
             table.string("differences", session.getDifferences().stream().map(String::valueOf).collect(Collectors.joining(",")));
             table.object("started_at", new Date(session.getStartedAt()));
@@ -54,9 +54,30 @@ public class StorageManager {
     }
 
     public void select(int id, Consumer<SessionDTO> consumer) {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+        this.async(() -> {
             var values = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.where("id", id));
             consumer.accept(values.isEmpty() ? null : values.getFirst());
         });
+    }
+
+    public List<SessionDTO> select() {
+        return this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
+    }
+
+    public void clean() {
+        this.async(() -> {
+            var values = select();
+            System.out.println(values.size() + " - " + values.getFirst());
+            for (SessionDTO value : values) {
+                if (!value.isValid()) {
+                    System.out.println("Pas valid : " + value.id() + " -> " + value);
+                    this.requestHelper.delete(Tables.SESSIONS, table -> table.where("id", value.id()));
+                }
+            }
+        });
+    }
+
+    private void async(Runnable runnable) {
+        this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, runnable);
     }
 }

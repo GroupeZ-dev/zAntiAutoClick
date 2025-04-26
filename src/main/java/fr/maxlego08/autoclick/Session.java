@@ -32,6 +32,7 @@ public class Session {
 
     public void setFinishedAt(long finishedAt) {
         this.finishedAt = finishedAt;
+        this.lastClickAt = 0;
     }
 
     public BukkitTask getTask() {
@@ -60,5 +61,9 @@ public class Session {
 
     public long getDuration() {
         return this.finishedAt - this.startedAt;
+    }
+
+    public boolean isValid() {
+        return this.differences.size() >= Config.minimumSessionClicks && this.getDuration() >= Config.minimumSessionDuration;
     }
 }

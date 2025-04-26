@@ -49,9 +49,12 @@ public class SessionManager implements Listener {
 
         session.setFinishedAt(System.currentTimeMillis());
         sessions.remove(uuid);
-        this.plugin.getStorageManager().insertSession(uuid, session);
 
-        this.plugin.getLogger().info(uuid + " vient de terminer une session de " + session.count() + " cliques. Durée: " + (session.getDuration() / 1000) + "s.");
+        // Si la session est valide, on va l'enregistrer
+        if (session.isValid()) {
+            this.plugin.getStorageManager().insertSession(uuid, session);
+            this.plugin.getLogger().info(uuid + " vient de terminer une session de " + session.count() + " cliques. Durée: " + (session.getDuration() / 1000) + "s.");
+        }
 
         var task = session.getTask();
         if (task != null) task.cancel();
@@ -86,6 +89,10 @@ public class SessionManager implements Listener {
         sender.sendMessage(String.format("Moyenne: %.2f ms", average));
         sender.sendMessage(String.format("Médiane: %.2f ms", median));
         sender.sendMessage(String.format("Écart type: %.2f ms", standardDeviation));
+    }
+
+    public void showAll(CommandSender sender) {
+
     }
 
     private double calculateMedian(List<Integer> data) {

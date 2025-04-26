@@ -22,8 +22,10 @@ public enum Message {
 
     DESCRIPTION_RELOAD("Reload configuration files"),
     DESCRIPTION_SHOW("Display a session"),
+    DESCRIPTION_CLEAN("Clean your database"),
 
-    SESSION_NOT_FOUND("&cImpossible to find the session &f%id%&c.");
+    SESSION_NOT_FOUND("&cImpossible to find the session &f%id%&c."),
+    CLEAN("&aThe database has been cleaned."),;
 
     private List<String> messages;
     private String message;

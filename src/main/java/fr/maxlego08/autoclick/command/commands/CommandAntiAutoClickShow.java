@@ -29,7 +29,7 @@ public class CommandAntiAutoClickShow extends VCommand {
                 return;
             }
 
-            plugin.getSessionManager().information(sender, Arrays.stream(session.differences().split(",")).map(Integer::parseInt).toList());
+            plugin.getSessionManager().information(sender, session.getDifferences());
         });
 
         return CommandType.SUCCESS;

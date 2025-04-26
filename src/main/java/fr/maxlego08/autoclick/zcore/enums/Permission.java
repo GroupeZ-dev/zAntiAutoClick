@@ -6,7 +6,7 @@ public enum Permission {
     ZANTIAUTOCLICK_RELOAD,
     ZANTIAUTOCLICK_SHOW,
 
-    ;
+    ZANTIAUTOCLICK_CLEAN;
 
     private final String permission;
 
