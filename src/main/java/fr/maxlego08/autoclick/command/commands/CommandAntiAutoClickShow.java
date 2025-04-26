@@ -6,8 +6,6 @@ import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.enums.Permission;
 import fr.maxlego08.autoclick.zcore.utils.commands.CommandType;
 
-import java.util.Arrays;
-
 public class CommandAntiAutoClickShow extends VCommand {
 
     public CommandAntiAutoClickShow(ClickPlugin plugin) {
@@ -29,7 +27,7 @@ public class CommandAntiAutoClickShow extends VCommand {
                 return;
             }
 
-            plugin.getSessionManager().information(sender, session.getDifferences());
+            plugin.getSessionManager().information(sender, session);
         });
 
         return CommandType.SUCCESS;

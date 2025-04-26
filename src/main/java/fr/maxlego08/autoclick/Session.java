@@ -1,20 +1,24 @@
 package fr.maxlego08.autoclick;
 
+import fr.maxlego08.autoclick.api.ClickSession;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class Session {
+public class Session implements ClickSession {
 
+    private final UUID uuid;
     private final long startedAt;
-    private final List<Long> differences = new ArrayList<>();
+    private final List<Integer> differences = new ArrayList<>();
     private long finishedAt;
 
     private long lastClickAt;
     private BukkitTask task;
 
-    public Session(long startedAt) {
+    public Session(UUID uuid, long startedAt) {
+        this.uuid = uuid;
         this.startedAt = startedAt;
     }
 
@@ -22,7 +26,8 @@ public class Session {
         return startedAt;
     }
 
-    public List<Long> getDifferences() {
+    @Override
+    public List<Integer> getDifferences() {
         return differences;
     }
 
@@ -51,7 +56,7 @@ public class Session {
         this.lastClickAt = lastClickAt;
     }
 
-    public void addDifferences(long difference) {
+    public void addDifferences(int difference) {
         this.differences.add(difference);
     }
 
@@ -59,11 +64,23 @@ public class Session {
         return this.differences.size();
     }
 
+    @Override
     public long getDuration() {
         return this.finishedAt - this.startedAt;
     }
 
+    @Override
     public boolean isValid() {
         return this.differences.size() >= Config.minimumSessionClicks && this.getDuration() >= Config.minimumSessionDuration;
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return this.uuid;
+    }
+
+    @Override
+    public int getId() {
+        return -1;
     }
 }

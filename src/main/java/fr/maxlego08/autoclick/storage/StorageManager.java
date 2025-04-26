@@ -66,11 +66,8 @@ public class StorageManager {
 
     public void clean() {
         this.async(() -> {
-            var values = select();
-            System.out.println(values.size() + " - " + values.getFirst());
-            for (SessionDTO value : values) {
+            for (SessionDTO value : select()) {
                 if (!value.isValid()) {
-                    System.out.println("Pas valid : " + value.id() + " -> " + value);
                     this.requestHelper.delete(Tables.SESSIONS, table -> table.where("id", value.id()));
                 }
             }
@@ -79,5 +76,9 @@ public class StorageManager {
 
     private void async(Runnable runnable) {
         this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, runnable);
+    }
+
+    public void select(Consumer<List<SessionDTO>> consumer) {
+        async(() -> consumer.accept(select()));
     }
 }

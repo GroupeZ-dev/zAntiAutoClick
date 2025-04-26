@@ -22,10 +22,18 @@ public enum Message {
 
     DESCRIPTION_RELOAD("Reload configuration files"),
     DESCRIPTION_SHOW("Display a session"),
+    DESCRIPTION_SHOW_ALL("Display all sessions"),
     DESCRIPTION_CLEAN("Clean your database"),
 
     SESSION_NOT_FOUND("&cImpossible to find the session &f%id%&c."),
-    CLEAN("&aThe database has been cleaned."),;
+    CLEAN("&aThe database has been cleaned."),
+    SESSION_INFORMATION(
+            "&fUUID&8: &7%uuid% &8(&7id: %id%&8)",
+            "&fMédiane&8: &7%median%ms",
+            "&fMoyenne&8: &7%average%ms",
+            "&fÉcart type&8: %color%%standard-deviation%",
+            "&fDurée&8: &7%duration%"
+    );
 
     private List<String> messages;
     private String message;
