@@ -7,3 +7,4 @@ description: Anti Auto Click
 website: https://groupez.dev/
 depends:
   - packetevents
+  - zMenu

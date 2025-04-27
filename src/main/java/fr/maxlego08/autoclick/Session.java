@@ -38,6 +38,7 @@ public class Session implements ClickSession {
     public void setFinishedAt(long finishedAt) {
         this.finishedAt = finishedAt;
         this.lastClickAt = 0;
+        System.out.println("FINITO");
     }
 
     public BukkitTask getTask() {

@@ -33,7 +33,8 @@ public enum Message {
             "&fMédiane&8: &7%median%ms",
             "&fMoyenne&8: &7%average%ms",
             "&fÉcart type&8: %color%%standard-deviation%",
-            "&fDurée&8: &7%duration%"
+            "&fDurée&8: &7%duration%",
+            "&fPourcentage&8: %color-percent%%percent%%"
     );
 
     private List<String> messages;
