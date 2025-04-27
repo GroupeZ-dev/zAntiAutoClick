@@ -1,7 +1,7 @@
 package fr.maxlego08.autoclick;
 
 import fr.maxlego08.autoclick.api.ClickSession;
-import fr.maxlego08.autoclick.storage.dto.SessionDTO;
+import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.utils.ZUtils;
 import org.bukkit.command.CommandSender;
@@ -12,7 +12,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -110,6 +112,12 @@ public class SessionManager extends ZUtils implements Listener {
         long hours = duration / 3600000;
         long minutes = (duration % 3600000) / 60000;
         long seconds = (duration % 60000) / 1000;
+
+        Map<Integer, Integer> occurrences = new HashMap<>();
+        trimmed.forEach(i -> occurrences.compute(i, (k, v) -> v == null ? 1 : v + 1));
+        List<Map.Entry<Integer, Integer>> sortedOccurrences = new ArrayList<>(occurrences.entrySet());
+        sortedOccurrences.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+        plugin.getLogger().info("Occurrences: " + sortedOccurrences);
 
         message(sender, Message.SESSION_INFORMATION,
                 "%uuid%", session.getUniqueId().toString(),

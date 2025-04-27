@@ -1,4 +1,4 @@
-package fr.maxlego08.autoclick.storage.dto;
+package fr.maxlego08.autoclick.api.storage.dto;
 
 import fr.maxlego08.autoclick.Config;
 import fr.maxlego08.autoclick.api.ClickSession;

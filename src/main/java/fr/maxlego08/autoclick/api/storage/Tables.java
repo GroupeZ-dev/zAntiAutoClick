@@ -1,4 +1,4 @@
-package fr.maxlego08.autoclick.storage;
+package fr.maxlego08.autoclick.api.storage;
 
 public interface Tables {
 
