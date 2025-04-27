@@ -3,6 +3,7 @@ package fr.maxlego08.autoclick;
 import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.zcore.enums.Message;
+import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.zcore.utils.ZUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
@@ -37,9 +38,7 @@ public class SessionManager extends ZUtils implements Listener {
 
             // Si la différence est trop courte, alors le joueur spam click
             if (difference >= Config.minimumDelay) {
-
                 session.addDifferences(difference);
-
             }
         }
 
@@ -75,32 +74,40 @@ public class SessionManager extends ZUtils implements Listener {
         }
     }
 
+    /**
+     * Provides information about a ClickSession to the specified CommandSender.
+     *
+     * <p>This method analyzes the click intervals of the provided ClickSession, calculates
+     * statistical data such as average, median, and standard deviation, and formats this
+     * information into a message sent to the CommandSender. The analysis excludes a
+     * percentage of extreme values based on the configuration settings. If the standard
+     * deviation is above a configured threshold and the 'sendIfClean' flag is false,
+     * the method will not send any information.</p>
+     *
+     * @param sender      the CommandSender to whom the session information will be sent
+     * @param session     the ClickSession containing the click interval data to analyze
+     * @param sendIfClean a flag indicating whether to send information even if the session
+     *                    is considered clean (i.e., within normal statistical bounds)
+     */
     public void information(CommandSender sender, ClickSession session, boolean sendIfClean) {
 
         List<Integer> intervals = session.getDifferences();
         long duration = session.getDuration();
-        // Trier les intervalles
         List<Integer> sorted = new ArrayList<>(intervals);
         Collections.sort(sorted);
 
-        // Retirer les 5% les plus bas et les 5% les plus hauts
         int size = sorted.size();
-        int removeCount = (int) (size * Config.removePercent);
+        int removeCount = (int) (size * Config.sessionTrimmed);
         List<Integer> trimmed = sorted.subList(removeCount, size - removeCount);
 
-        // Moyenne
         double average = trimmed.stream().mapToInt(Integer::intValue).average().orElse(0);
 
-        // Écart type
         double variance = trimmed.stream().mapToDouble(i -> Math.pow(i - average, 2)).average().orElse(0);
         double standardDeviation = Math.sqrt(variance);
 
-        if (standardDeviation >= Config.sessionIsNormal && !sendIfClean) return;
+        if (standardDeviation >= Config.standardDeviation && !sendIfClean) return;
 
-        // Médiane
         double median = calculateMedian(trimmed);
-
-        // Affichage
 
         DecimalFormat format = new DecimalFormat("#.##");
 

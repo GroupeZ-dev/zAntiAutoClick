@@ -1,6 +1,7 @@
 package fr.maxlego08.autoclick;
 
 import fr.maxlego08.autoclick.api.Result;
+import fr.maxlego08.autoclick.zcore.utils.Config;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +20,7 @@ public class ClickAnalyzer {
         List<Integer> sorted = new ArrayList<>(clicks);
         sorted.sort(Comparator.naturalOrder());
 
-        int removeCount = (int) (sorted.size() * 0.05);
+        int removeCount = (int) (sorted.size() * Config.sessionTrimmed);
         if (removeCount * 2 >= sorted.size()) {
             return Result.empty();
         }
@@ -40,8 +41,8 @@ public class ClickAnalyzer {
 
         for (int i = 1; i < cleaned.size(); i++) {
             int diff = Math.abs(cleaned.get(i) - last);
-            if (diff < 10) smallVariations++;
-            if (diff > 150) largeJumpDetected++;
+            if (diff < Config.smallVariation) smallVariations++;
+            if (diff > Config.largeVariation) largeJumpDetected++;
             last = cleaned.get(i);
         }
 
@@ -59,34 +60,41 @@ public class ClickAnalyzer {
 
         double score = 0.0;
 
-        if (smallVariationPercent > 50) {
-            score += (smallVariationPercent - 50) * 0.5; // max 25%
+        // Calcul du score en utilisant la configuration
+
+        // Small variations
+        if (smallVariationPercent > Config.smallVariationThresholdPercent) {
+            score += (smallVariationPercent - Config.smallVariationThresholdPercent) * Config.smallVariationMultiplier;
         }
 
-        if (range < mean * 0.3) {
-            score += (1 - (range / (mean * 0.3))) * 25; // max 25%
+        // Range
+        if (range < mean * Config.rangeRelativeThreshold) {
+            score += (1 - (range / (mean * Config.rangeRelativeThreshold))) * Config.rangeMaxBonus;
         }
 
-        if (stdDev < mean * 0.1) {
-            score += (1 - (stdDev / (mean * 0.1))) * 20; // max 20%
+        // Standard deviation
+        if (stdDev < mean * Config.stddevRelativeThreshold) {
+            score += (1 - (stdDev / (mean * Config.stddevRelativeThreshold))) * Config.stddevMaxBonus;
         }
 
-        if (top1Percentage > 10) {
-            score += (top1Percentage - 10) * 0.5; // max 10%
+        // Top 1 frequency
+        if (top1Percentage > Config.top1FrequencyThresholdPercent) {
+            score += (top1Percentage - Config.top1FrequencyThresholdPercent) * Config.top1FrequencyMultiplier;
         }
 
-        if (top3Percentage > 30) {
-            score += (top3Percentage - 30) * 0.3; // max 15%
+        // Top 3 frequencies
+        if (top3Percentage > Config.top3FrequencyThresholdPercent) {
+            score += (top3Percentage - Config.top3FrequencyThresholdPercent) * Config.top3FrequencyMultiplier;
         }
 
+        // No large jumps
         if (largeJumpDetected == 0) {
-            score += 15;
+            score += Config.noLargeJumpBonus;
         }
 
-        score = Math.min(score, 100.0);
-        return new Result(score >= 60, score);
+        score = Math.min(score, Config.maxScore);
+        return new Result(score >= Config.score, score);
     }
-
 
     public static void main(String[] args) {
         String session1 = "703,640,703,604,704,637,669,671,672,704,635,704,605,702,635,671,634,708,637,669,637,639,672,637,637,671,638,674,638,704,604,703,635,636,703,672,640,705,638,669,637,703,604,703,704,638,638,671,639,640,672,671,670,638,671,640,704,637,672,639,706,636,703,638,603,670,639,640,673,673,671,637,638,672,637,674,639,706,638,637,673,702,603,672,674,704,638,636,670,637,670,637,705,606,672,670,603,705,637,606,702,604,636,707,636,671,670,670,636,670,705,636,637,672,637,707,707,602,675,672,704,637,704,607,704,639,638,671,639,639,670,636,704,637,671,637,705,637,670,640,635,671,638,672,671,671,605,672,703,670,636,670,670,668,705,605,637,636,669,705,600,704,637,637,670,704,612,663,672,703,638,700,637,673,705,638,703,603,604,672,703,672,604,637,636,669,704,636,705,640,673,640,639,672,635,705,634,672,637,704,637,670,637,706,603,706,604,638,637,674,638,704,639,670,672,672,636,706,641,672,639,640,670,637,703,638,670,673,670,703,637,670,637,703,636,673,670,670,640,671,636,704,606,671,670,703,638,671,639,703,637,671,638,706,641,673,664,670,640,638,670,637,670,638,704,603,704,638,639,676,669,672,638,642,670,703,636,670,671,669,637,669,634,705,604,637,710,603,636,669,639,707,602,704,636,639,671,706,637,638,671,673,674,640,704,641,666,638,705,636,671,637,670,669,671,703,640,702,604,705,638,638,672,704,603,669,671,705,637,638,671,636,673,637,705,603,704,638,638,673,670,669,705,642,640,670,706,635,636,673,639,642,671,639,637,668,638,671,672,672,639,703,640,671,637,638,671,703,638,706,603,634,670,638,636,670,702,605,670,671,703,640,703,605,703,636,705,602,705,639,705,606,703,638,702,636,671,637,670,702,639,703,603,703,637,603,705,637,704,604,705,648,599,703,604,640,703,635,672,639,706,604,671,669,634,671,637,670,674,670,643,636,672,704,634,636,674,701,637,669,636,701,639,671,703,637,703,603,705,637,705,603,704,636,705,637,672,636,639,671"; // Ton premier énorme bloc ici

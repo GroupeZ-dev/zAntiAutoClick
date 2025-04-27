@@ -1,6 +1,7 @@
 package fr.maxlego08.autoclick;
 
 import fr.maxlego08.autoclick.api.ClickSession;
+import fr.maxlego08.autoclick.zcore.utils.Config;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;

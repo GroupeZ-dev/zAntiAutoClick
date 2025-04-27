@@ -6,6 +6,7 @@ import fr.maxlego08.autoclick.command.CommandManager;
 import fr.maxlego08.autoclick.command.commands.CommandAntiAutoClick;
 import fr.maxlego08.autoclick.storage.StorageManager;
 import fr.maxlego08.autoclick.zcore.ZPlugin;
+import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.zcore.utils.plugins.Metrics;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 

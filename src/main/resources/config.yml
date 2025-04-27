@@ -1,4 +1,3 @@
-# Debug dans la console
 debug: false
 
 # Storage:
@@ -29,21 +28,69 @@ database-configuration:
   # Enable of not the SQL debug mode
   debug: true
 
-# Si le clic est trop rapide, on ne va pas le prendre en compte (500ms).
-minimum-delay: 500
 
-# Fin de la session (50 ticks, 2.5s).
-# Permet de mettre fin à la session de clic sur joueur pour une analyse postérieure.
-session-end-after: 50
+# Session configuration
+session:
 
-# Temps minimum de session (60 secondes).
-minimum-session-duration: 60000 # 60 secondes
+  # If the click is too fast, it will not be considered (500ms).
+  minimum-delay: 500
 
-# Nombre de clics minimum dans la session
-minimum-session-clicks: 40
+  # End of session (50 ticks, 2.5s).
+  # Allows ending the click session on player for later analysis.
+  end-after: 50
 
-# On supprime le 5% les plus hauts et les plus bas
-remove-percent: 0.05
+  # Minimum session duration (60 seconds).
+  minimum-duration: 60000 # 60 seconds
 
-# Si une session a un écart type inférieur ou égal à 20.0, alors le joueur est suspect.
-session-is-normal: 20.0
+  # Minimum number of clicks in the session
+  minimum-clicks: 40
+
+# Session analysis
+analyze:
+
+  # Percentage of the session to trim from the ends (e.g., 0.1 = 10%)
+  session-trimmed: 0.1
+
+  # Maximum difference between two clicks to be considered a small variation (in ms)
+  small-variation: 10
+
+  # Minimum difference between two clicks to be considered a large jump (in ms)
+  large-variation: 200
+
+  # Minimum score to consider the session accepted
+  required-score: 60.0
+
+  # Parameters for score calculation:
+
+  scoring:
+    # Influence of small variations
+    small-variation:
+      threshold-percent: 50.0   # Percentage at which points start to be awarded
+      multiplier: 0.5           # Points added per percentage above the threshold
+      max-bonus: 25.0           # Maximum possible bonus
+
+    # Influence of the range
+    range:
+      relative-threshold: 0.3   # % of the average to define a small range
+      max-bonus: 25.0           # Maximum possible bonus
+
+    # Influence of the standard deviation
+    stddev:
+      relative-threshold: 0.1   # % of the average to define a low standard deviation
+      max-bonus: 20.0           # Maximum possible bonus
+
+    # Influence of the frequency of the most common click
+    top1-frequency:
+      threshold-percent: 10.0   # Percentage at which points start to be added
+      multiplier: 0.5           # Points added per percentage above the threshold
+
+    # Influence of the sum of the three most frequent clicks
+    top3-frequency:
+      threshold-percent: 30.0   # Percentage at which points start to be added
+      multiplier: 0.3           # Points added per percentage above the threshold
+
+    # Bonus if no large jump is detected
+    no-large-jump-bonus: 15.0
+
+  # Maximum possible score (do not exceed)
+  max-score: 100.0

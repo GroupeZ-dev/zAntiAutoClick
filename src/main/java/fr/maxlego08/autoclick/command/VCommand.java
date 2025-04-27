@@ -1,7 +1,7 @@
 package fr.maxlego08.autoclick.command;
 
 import fr.maxlego08.autoclick.ClickPlugin;
-import fr.maxlego08.autoclick.Config;
+import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.enums.Permission;
 import fr.maxlego08.autoclick.zcore.utils.commands.Arguments;

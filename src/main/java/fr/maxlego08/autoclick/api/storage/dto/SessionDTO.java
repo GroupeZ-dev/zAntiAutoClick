@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.api.storage.dto;
 
-import fr.maxlego08.autoclick.Config;
+import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.api.ClickSession;
 
 import java.util.Arrays;
