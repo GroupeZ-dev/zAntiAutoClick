@@ -6,6 +6,7 @@ import fr.maxlego08.autoclick.command.CommandManager;
 import fr.maxlego08.autoclick.command.commands.CommandAntiAutoClick;
 import fr.maxlego08.autoclick.storage.StorageManager;
 import fr.maxlego08.autoclick.zcore.ZPlugin;
+import fr.maxlego08.autoclick.zcore.utils.plugins.Metrics;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 
 import java.util.List;
@@ -36,6 +37,8 @@ public final class ClickPlugin extends ZPlugin {
         this.getServer().getPluginManager().registerEvents(this.sessionManager, this);
 
         this.commandManager.registerCommand(this, "zantiautoclicks", new CommandAntiAutoClick(this), List.of("zaac"));
+
+        new Metrics(this, 25641);
 
         commandManager.validCommands();
     }

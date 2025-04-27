@@ -4,8 +4,8 @@ import fr.maxlego08.autoclick.ClickPlugin;
 import fr.maxlego08.autoclick.Session;
 import fr.maxlego08.autoclick.api.storage.StorageType;
 import fr.maxlego08.autoclick.api.storage.Tables;
-import fr.maxlego08.autoclick.migrations.SessionMigration;
 import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
+import fr.maxlego08.autoclick.migrations.SessionMigration;
 import fr.maxlego08.sarah.DatabaseConfiguration;
 import fr.maxlego08.sarah.DatabaseConnection;
 import fr.maxlego08.sarah.HikariDatabaseConnection;
@@ -61,6 +61,18 @@ public class StorageManager {
         MigrationManager.execute(connection, JULogger.from(plugin.getLogger()));
     }
 
+    /**
+     * Creates a {@link DatabaseConfiguration} from the {@link FileConfiguration}
+     * and {@link StorageType} provided.
+     *
+     * <p>This method will first attempt to retrieve the configuration values
+     * from the global database configuration file, falling back to the plugin
+     * configuration if the global configuration is unavailable.
+     *
+     * @param configuration the plugin configuration
+     * @param storageType   the type of storage to use
+     * @return a database configuration
+     */
     private DatabaseConfiguration getDatabaseConfiguration(FileConfiguration configuration, StorageType storageType) {
         GlobalDatabaseConfiguration globalDatabaseConfiguration = new GlobalDatabaseConfiguration(configuration);
         String tablePrefix = globalDatabaseConfiguration.getTablePrefix();
@@ -74,6 +86,15 @@ public class StorageManager {
         return new DatabaseConfiguration(tablePrefix, user, password, port, host, database, debug, storageType == StorageType.SQLITE ? DatabaseType.SQLITE : DatabaseType.MYSQL);
     }
 
+    /**
+     * Inserts a session into the database asynchronously.
+     * <p>
+     * This method will insert a session into the database with the given id and session data.
+     * </p>
+     *
+     * @param uuid    The id of the session to insert.
+     * @param session The session to insert.
+     */
     public void insertSession(UUID uuid, Session session) {
         this.async(() -> this.requestHelper.insert(Tables.SESSIONS, table -> {
             table.uuid("unique_id", uuid);
@@ -83,6 +104,14 @@ public class StorageManager {
         }));
     }
 
+    /**
+     * Selects a session from the database asynchronously.
+     * <p>
+     * This method will execute a consumer upon completion with the selected session, or null if no session was found.
+     *
+     * @param id       The id of the session to select.
+     * @param consumer The consumer to execute upon completion.
+     */
     public void select(int id, Consumer<SessionDTO> consumer) {
         this.async(() -> {
             var values = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.where("id", id));
@@ -90,10 +119,25 @@ public class StorageManager {
         });
     }
 
+    /**
+     * Selects all sessions from the database.
+     * <p>
+     * This method returns a list of all sessions in the database.
+     * </p>
+     *
+     * @return A list of all sessions in the database.
+     */
     public List<SessionDTO> select() {
         return this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
     }
 
+    /**
+     * Cleans up invalid sessions from the database.
+     * <p>
+     * This method asynchronously iterates over all sessions and removes any
+     * session that is deemed invalid based on its validation criteria.
+     * </p>
+     */
     public void clean() {
         this.async(() -> {
             for (SessionDTO value : select()) {
@@ -104,10 +148,26 @@ public class StorageManager {
         });
     }
 
+    /**
+     * Runs a runnable asynchronously on the server's scheduler.
+     * <p>
+     * This is a convenience method for running database operations asynchronously.
+     * </p>
+     *
+     * @param runnable The runnable to run asynchronously.
+     */
     private void async(Runnable runnable) {
         this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, runnable);
     }
 
+    /**
+     * Asynchronously selects all sessions from the database and passes them to a consumer.
+     * <p>
+     * The consumer is called on a new thread, and the database query is executed asynchronously.
+     * </p>
+     *
+     * @param consumer The consumer to call with the list of sessions.
+     */
     public void select(Consumer<List<SessionDTO>> consumer) {
         async(() -> consumer.accept(select()));
     }
