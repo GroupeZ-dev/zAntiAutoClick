@@ -2,9 +2,12 @@ package fr.maxlego08.autoclick.storage;
 
 import fr.maxlego08.autoclick.ClickPlugin;
 import fr.maxlego08.autoclick.Session;
+import fr.maxlego08.autoclick.api.result.AnalyzeResult;
+import fr.maxlego08.autoclick.api.result.SessionResult;
 import fr.maxlego08.autoclick.api.storage.StorageType;
 import fr.maxlego08.autoclick.api.storage.Tables;
 import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
+import fr.maxlego08.autoclick.migrations.InvalidSessionMigration;
 import fr.maxlego08.autoclick.migrations.SessionMigration;
 import fr.maxlego08.sarah.DatabaseConfiguration;
 import fr.maxlego08.sarah.DatabaseConnection;
@@ -57,6 +60,7 @@ public class StorageManager {
 
         MigrationManager.setMigrationTableName("zantiautoclick_migrations");
         MigrationManager.registerMigration(new SessionMigration());
+        MigrationManager.registerMigration(new InvalidSessionMigration());
 
         MigrationManager.execute(connection, JULogger.from(plugin.getLogger()));
     }
@@ -101,6 +105,26 @@ public class StorageManager {
             table.string("differences", session.getDifferences().stream().map(String::valueOf).collect(Collectors.joining(",")));
             table.object("started_at", new Date(session.getStartedAt()));
             table.object("finished_at", new Date(session.getFinishedAt()));
+        }));
+    }
+
+    /**
+     * Inserts an invalid session into the database asynchronously.
+     * <p>
+     * This method will insert an invalid session into the database with the given session id and analysis results.
+     * </p>
+     *
+     * @param session      The session to insert.
+     * @param sessionResult The session result of the session.
+     * @param analyzeResult The analyze result of the session.
+     */
+    public void insertInvalidSession(Session session, SessionResult sessionResult, AnalyzeResult analyzeResult) {
+        this.async(() -> this.requestHelper.insert(Tables.INVALID_SESSIONS, table -> {
+            table.bigInt("session_id", session.getId());
+            table.decimal("result", analyzeResult.percent());
+            table.decimal("average", sessionResult.average());
+            table.decimal("median", sessionResult.median());
+            table.decimal("standard_deviation", sessionResult.standardDeviation());
         }));
     }
 

@@ -1,6 +1,7 @@
 package fr.maxlego08.autoclick;
 
 import fr.maxlego08.autoclick.api.ClickSession;
+import fr.maxlego08.autoclick.api.result.SessionResult;
 import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.utils.Config;
@@ -54,15 +55,60 @@ public class SessionManager extends ZUtils implements Listener {
         session.setFinishedAt(System.currentTimeMillis());
         sessions.remove(uuid);
 
+        var storage = this.plugin.getStorageManager();
+
         // Si la session est valide, on va l'enregistrer
         if (session.isValid()) {
-            this.plugin.getStorageManager().insertSession(uuid, session);
+            storage.insertSession(uuid, session);
             this.plugin.getLogger().info(uuid + " vient de terminer une session de " + session.count() + " cliques. Durée: " + (session.getDuration() / 1000) + "s.");
         }
 
         var task = session.getTask();
         if (task != null) task.cancel();
         session.setTask(null);
+
+        this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
+
+            var analyzeResult = ClickAnalyzer.analyzeSession(session.getDifferences());
+
+            if (analyzeResult.isCheat()) {
+
+                var sessionResult = this.verifySession(session);
+                this.plugin.getLogger().info("La session de " + uuid + " (id: " + session.getId() + ") est considéré comme une session d'auto-click.");
+                storage.insertInvalidSession(session, sessionResult, analyzeResult);
+            }
+        });
+    }
+
+    /**
+     * Verifies a session against the configured limits.
+     * <p>
+     * This method analyzes the click intervals of the provided ClickSession, calculates
+     * statistical data such as average, median, and standard deviation, and formats this
+     * information into a SessionResult object. The analysis excludes a percentage of
+     * extreme values based on the configuration settings.
+     * </p>
+     *
+     * @param session The ClickSession containing the click interval data to analyze.
+     * @return A SessionResult object containing the calculated statistical data.
+     */
+    private SessionResult verifySession(ClickSession session) {
+
+        List<Integer> intervals = session.getDifferences();
+        List<Integer> sorted = new ArrayList<>(intervals);
+        Collections.sort(sorted);
+
+        int size = sorted.size();
+        int removeCount = (int) (size * Config.sessionTrimmed);
+        List<Integer> trimmed = sorted.subList(removeCount, size - removeCount);
+
+        double average = trimmed.stream().mapToInt(Integer::intValue).average().orElse(0);
+
+        double variance = trimmed.stream().mapToDouble(i -> Math.pow(i - average, 2)).average().orElse(0);
+        double standardDeviation = Math.sqrt(variance);
+        double median = calculateMedian(trimmed);
+
+        return new SessionResult(average, median, standardDeviation);
     }
 
     @EventHandler
@@ -91,23 +137,14 @@ public class SessionManager extends ZUtils implements Listener {
      */
     public void information(CommandSender sender, ClickSession session, boolean sendIfClean) {
 
-        List<Integer> intervals = session.getDifferences();
         long duration = session.getDuration();
-        List<Integer> sorted = new ArrayList<>(intervals);
-        Collections.sort(sorted);
-
-        int size = sorted.size();
-        int removeCount = (int) (size * Config.sessionTrimmed);
-        List<Integer> trimmed = sorted.subList(removeCount, size - removeCount);
-
-        double average = trimmed.stream().mapToInt(Integer::intValue).average().orElse(0);
-
-        double variance = trimmed.stream().mapToDouble(i -> Math.pow(i - average, 2)).average().orElse(0);
-        double standardDeviation = Math.sqrt(variance);
+        var intervals = session.getDifferences();
+        var sessionResult = verifySession(session);
+        var average = sessionResult.average();
+        var median = sessionResult.median();
+        var standardDeviation = sessionResult.standardDeviation();
 
         if (standardDeviation >= Config.standardDeviation && !sendIfClean) return;
-
-        double median = calculateMedian(trimmed);
 
         DecimalFormat format = new DecimalFormat("#.##");
 
@@ -118,7 +155,15 @@ public class SessionManager extends ZUtils implements Listener {
         var result = ClickAnalyzer.analyzeSession(intervals);
         var percents = result.percent();
 
-        message(sender, Message.SESSION_INFORMATION, "%uuid%", session.getUniqueId().toString(), "%id%", session.getId(), "%average%", format.format(average), "%median%", format.format(median), "%color%", standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a", "%standard-deviation%", format.format(standardDeviation), "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds), "%percent%", format.format(percents), "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a", "%cheat%", result.isCheat() ? "Oui" : "Non", "%color-cheat%", result.isCheat() ? "§2" : "§4");
+        message(sender, Message.SESSION_INFORMATION, "%uuid%", session.getUniqueId().toString(), "%id%", session.getId(),
+                "%average%", format.format(average),
+                "%median%", format.format(median),
+                "%color%", standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a",
+                "%standard-deviation%", format.format(standardDeviation),
+                "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds),
+                "%percent%", format.format(percents),
+                "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a", "%cheat%",
+                result.isCheat() ? "Oui" : "Non", "%color-cheat%", result.isCheat() ? "§2" : "§4");
     }
 
 

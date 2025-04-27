@@ -57,7 +57,7 @@ public class Config {
         score = configuration.getDouble("analyze.score", 60.0);
         maxScore = configuration.getDouble("analyze.max-score", 100.0);
 
-        // Scoring détaillé
+        // Scoring
         smallVariationThresholdPercent = configuration.getDouble("analyze.scoring.small-variation.threshold-percent", 50.0);
         smallVariationMultiplier = configuration.getDouble("analyze.scoring.small-variation.multiplier", 0.5);
         smallVariationMaxBonus = configuration.getDouble("analyze.scoring.small-variation.max-bonus", 25.0);

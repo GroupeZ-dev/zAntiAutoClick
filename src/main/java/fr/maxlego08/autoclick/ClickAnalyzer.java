@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick;
 
-import fr.maxlego08.autoclick.api.Result;
+import fr.maxlego08.autoclick.api.result.AnalyzeResult;
 import fr.maxlego08.autoclick.zcore.utils.Config;
 
 import java.util.ArrayList;
@@ -12,9 +12,9 @@ import java.util.Map;
 
 public class ClickAnalyzer {
 
-    public static Result analyzeSession(List<Integer> clicks) {
+    public static AnalyzeResult analyzeSession(List<Integer> clicks) {
         if (clicks == null || clicks.size() < 10) {
-            return Result.empty();
+            return AnalyzeResult.empty();
         }
 
         List<Integer> sorted = new ArrayList<>(clicks);
@@ -22,7 +22,7 @@ public class ClickAnalyzer {
 
         int removeCount = (int) (sorted.size() * Config.sessionTrimmed);
         if (removeCount * 2 >= sorted.size()) {
-            return Result.empty();
+            return AnalyzeResult.empty();
         }
 
         List<Integer> cleaned = sorted.subList(removeCount, sorted.size() - removeCount);
@@ -93,7 +93,7 @@ public class ClickAnalyzer {
         }
 
         score = Math.min(score, Config.maxScore);
-        return new Result(score >= Config.score, score);
+        return new AnalyzeResult(score >= Config.score, score);
     }
 
     public static void main(String[] args) {
