@@ -12,13 +12,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 public class SessionManager extends ZUtils implements Listener {
 
@@ -34,24 +31,22 @@ public class SessionManager extends ZUtils implements Listener {
         long now = System.currentTimeMillis();
         var session = this.sessions.computeIfAbsent(uuid, k -> new Session(uuid, now));
 
-        System.out.println(session.getLastClickAt());
         if (session.getLastClickAt() != 0) {
 
             var difference = (int) ((int) now - session.getLastClickAt());
-            System.out.println("diff : " + difference);
 
             // Si la différence est trop courte, alors le joueur spam click
             if (difference >= Config.minimumDelay) {
 
                 session.addDifferences(difference);
 
-                var task = session.getTask();
-                if (task != null) task.cancel();
-
-                session.setTask(this.plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.endSession(uuid, session), Config.sessionEndAfter));
             }
         }
 
+        var task = session.getTask();
+        if (task != null) task.cancel();
+
+        session.setTask(this.plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.endSession(uuid, session), Config.sessionEndAfter));
         session.setLastClickAt(now);
     }
 
@@ -97,10 +92,7 @@ public class SessionManager extends ZUtils implements Listener {
         double average = trimmed.stream().mapToInt(Integer::intValue).average().orElse(0);
 
         // Écart type
-        double variance = trimmed.stream()
-                .mapToDouble(i -> Math.pow(i - average, 2))
-                .average()
-                .orElse(0);
+        double variance = trimmed.stream().mapToDouble(i -> Math.pow(i - average, 2)).average().orElse(0);
         double standardDeviation = Math.sqrt(variance);
 
         if (standardDeviation >= Config.sessionIsNormal && !sendIfClean) return;
@@ -119,19 +111,7 @@ public class SessionManager extends ZUtils implements Listener {
         var result = ClickAnalyzer.analyzeSession(intervals);
         var percents = result.percent();
 
-        message(sender, Message.SESSION_INFORMATION,
-                "%uuid%", session.getUniqueId().toString(),
-                "%id%", session.getId(),
-                "%average%", format.format(average),
-                "%median%", format.format(median),
-                "%color%", standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a",
-                "%standard-deviation%", format.format(standardDeviation),
-                "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds),
-                "%percent%", format.format(percents),
-                "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a",
-                "%cheat%", result.isCheat() ? "Oui" : "Non",
-                "%color-cheat%", result.isCheat() ? "§2" : "§4"
-        );
+        message(sender, Message.SESSION_INFORMATION, "%uuid%", session.getUniqueId().toString(), "%id%", session.getId(), "%average%", format.format(average), "%median%", format.format(median), "%color%", standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a", "%standard-deviation%", format.format(standardDeviation), "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds), "%percent%", format.format(percents), "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a", "%cheat%", result.isCheat() ? "Oui" : "Non", "%color-cheat%", result.isCheat() ? "§2" : "§4");
     }
 
 
