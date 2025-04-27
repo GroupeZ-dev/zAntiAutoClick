@@ -116,9 +116,8 @@ public class SessionManager extends ZUtils implements Listener {
         long minutes = (duration % 3600000) / 60000;
         long seconds = (duration % 60000) / 1000;
 
-        var percents = calculateCheatProbability(trimmed, duration / 1000.0);
-        boolean isCheat = ClickAnalyzer.analyzeSession("Session: " + session.getId(), intervals);
-        System.out.println("Result: " + isCheat);
+        var result = ClickAnalyzer.analyzeSession(intervals);
+        var percents = result.percent();
 
         message(sender, Message.SESSION_INFORMATION,
                 "%uuid%", session.getUniqueId().toString(),
@@ -129,70 +128,10 @@ public class SessionManager extends ZUtils implements Listener {
                 "%standard-deviation%", format.format(standardDeviation),
                 "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds),
                 "%percent%", format.format(percents),
-                "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a"
+                "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a",
+                "%cheat%", result.isCheat() ? "Oui" : "Non",
+                "%color-cheat%", result.isCheat() ? "§2" : "§4"
         );
-    }
-
-    private double calculateCheatProbability(List<Integer> differences, double sessionDurationSec) {
-        if (differences == null || differences.isEmpty()) {
-            return 0.0;
-        }
-
-        // Supprimer les 5% des extrêmes
-        Collections.sort(differences);
-        int size = differences.size();
-        int fromIndex = (int) (size * 0.05);
-        int toIndex = (int) (size * 0.95);
-        List<Integer> trimmed = differences.subList(fromIndex, toIndex);
-
-        // Calcul de la moyenne et de l'écart-type
-        double mean = trimmed.stream().mapToDouble(Integer::doubleValue).average().orElse(0.0);
-        double variance = trimmed.stream().mapToDouble(d -> Math.pow(d - mean, 2)).average().orElse(0.0);
-        double stdDev = Math.sqrt(variance);
-
-        int trimmedClickCount = trimmed.size();
-
-        // Calcul du nombre d'occurrences des mêmes temps de clic
-        Map<Integer, Integer> frequencyMap = new HashMap<>();
-        for (int diff : trimmed) {
-            frequencyMap.put(diff, frequencyMap.getOrDefault(diff, 0) + 1);
-        }
-
-        int maxOccurrence = frequencyMap.values().stream().max(Integer::compareTo).orElse(0);
-        long uniqueDifferences = frequencyMap.keySet().size();
-
-        double score = 0.0;
-
-        // Plus l'écart-type est faible, plus la probabilité est forte
-        if (stdDev < 20.0) {
-            score += 50.0;
-        }
-
-        // Plus la session est longue, plus c'est suspect (au-delà de 60 secondes)
-        if (sessionDurationSec > 60.0) {
-            score += Math.min(25.0, (sessionDurationSec - 60.0) / 2.0);
-        }
-
-        // Plus le nombre de clics est élevé, plus c'est suspect (au-delà de 100 clics)
-        if (trimmedClickCount > 100) {
-            score += Math.min(25.0, (trimmedClickCount - 100) / 5.0);
-        }
-
-        // Si une seule occurrence est très élevée (>20) et pondération selon la taille totale
-        if (maxOccurrence > 50) {
-            double ratio = (double) maxOccurrence / trimmedClickCount;
-            System.out.println("Ratio : " + ratio);
-            score += Math.min(25.0, ratio * 100.0);
-        }
-
-        var r = 0.25;
-        System.out.println(uniqueDifferences + " < " + (trimmedClickCount * r) + " -- " + trimmedClickCount + " -> " + (uniqueDifferences < trimmedClickCount * r));
-        if (uniqueDifferences < trimmedClickCount * r) {
-            score += Math.min(25.0, ((trimmedClickCount * r) - uniqueDifferences) / 2.0);
-        }
-
-        // La probabilité est bornée à 100 max
-        return Math.min(score, 100.0);
     }
 
 

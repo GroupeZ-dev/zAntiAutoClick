@@ -1,6 +1,9 @@
 package fr.maxlego08.autoclick;
 
+import fr.maxlego08.autoclick.api.Result;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -8,55 +11,82 @@ import java.util.Map;
 
 public class ClickAnalyzer {
 
-    public static boolean analyzeSession(String sessionName, List<Integer> clicks) {
+    public static Result analyzeSession(List<Integer> clicks) {
         if (clicks == null || clicks.size() < 10) {
-            return false;
+            return Result.empty();
         }
 
-        int originalSize = clicks.size();
-
-        // Trier les clics pour enlever les 5% extrêmes
         List<Integer> sorted = new ArrayList<>(clicks);
         sorted.sort(Comparator.naturalOrder());
 
-        int removeCount = (int) (sorted.size() * 0.05); // 5% haut, 5% bas
+        int removeCount = (int) (sorted.size() * 0.05);
         if (removeCount * 2 >= sorted.size()) {
-            return false;
+            return Result.empty();
         }
 
         List<Integer> cleaned = sorted.subList(removeCount, sorted.size() - removeCount);
 
-        int totalClicks = cleaned.size();
-
-        // Compter la fréquence de chaque valeur
-        Map<Integer, Integer> frequencyMap = new HashMap<>();
-        for (int click : cleaned) {
-            frequencyMap.put(click, frequencyMap.getOrDefault(click, 0) + 1);
-        }
-
-        // Écart-type général
         double mean = cleaned.stream().mapToDouble(a -> a).average().orElse(0);
         double variance = cleaned.stream().mapToDouble(a -> Math.pow(a - mean, 2)).sum() / cleaned.size();
         double stdDev = Math.sqrt(variance);
 
-        // Top timings
+        int min = Collections.min(cleaned);
+        int max = Collections.max(cleaned);
+        int range = max - min;
+
+        int smallVariations = 0;
+        int largeJumpDetected = 0;
+        int last = cleaned.getFirst();
+
+        for (int i = 1; i < cleaned.size(); i++) {
+            int diff = Math.abs(cleaned.get(i) - last);
+            if (diff < 10) smallVariations++;
+            if (diff > 150) largeJumpDetected++;
+            last = cleaned.get(i);
+        }
+
+        double smallVariationPercent = (smallVariations * 100.0) / (cleaned.size() - 1);
+
+        Map<Integer, Integer> frequencyMap = new HashMap<>();
+        for (int click : cleaned) {
+            frequencyMap.put(click, frequencyMap.getOrDefault(click, 0) + 1);
+        }
         List<Map.Entry<Integer, Integer>> topFrequencies = new ArrayList<>(frequencyMap.entrySet());
         topFrequencies.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
 
-        int uniqueTimings = frequencyMap.size();
-        double top1Percentage = (topFrequencies.getFirst().getValue() * 100.0) / totalClicks;
-        double top3Percentage = topFrequencies.stream().limit(3).mapToInt(Map.Entry::getValue).sum() * 100.0 / totalClicks;
+        double top1Percentage = (topFrequencies.getFirst().getValue() * 100.0) / cleaned.size();
+        double top3Percentage = topFrequencies.stream().limit(3).mapToInt(Map.Entry::getValue).sum() * 100.0 / cleaned.size();
 
-        // Système de scoring
-        int suspicionPoints = 0;
+        double score = 0.0;
 
-        if (uniqueTimings < 40) suspicionPoints++; // Peu de diversité
-        if (top1Percentage > 10) suspicionPoints++; // Une seule valeur trop présente
-        if (top3Percentage > 30) suspicionPoints++; // Trois valeurs dominent trop
-        if (stdDev < 50) suspicionPoints++; // Trop peu de variance générale
+        if (smallVariationPercent > 50) {
+            score += (smallVariationPercent - 50) * 0.5; // max 25%
+        }
 
-        return suspicionPoints >= 2;
+        if (range < mean * 0.3) {
+            score += (1 - (range / (mean * 0.3))) * 25; // max 25%
+        }
+
+        if (stdDev < mean * 0.1) {
+            score += (1 - (stdDev / (mean * 0.1))) * 20; // max 20%
+        }
+
+        if (top1Percentage > 10) {
+            score += (top1Percentage - 10) * 0.5; // max 10%
+        }
+
+        if (top3Percentage > 30) {
+            score += (top3Percentage - 30) * 0.3; // max 15%
+        }
+
+        if (largeJumpDetected == 0) {
+            score += 15;
+        }
+
+        score = Math.min(score, 100.0);
+        return new Result(score >= 60, score);
     }
+
 
     public static void main(String[] args) {
         String session1 = "703,640,703,604,704,637,669,671,672,704,635,704,605,702,635,671,634,708,637,669,637,639,672,637,637,671,638,674,638,704,604,703,635,636,703,672,640,705,638,669,637,703,604,703,704,638,638,671,639,640,672,671,670,638,671,640,704,637,672,639,706,636,703,638,603,670,639,640,673,673,671,637,638,672,637,674,639,706,638,637,673,702,603,672,674,704,638,636,670,637,670,637,705,606,672,670,603,705,637,606,702,604,636,707,636,671,670,670,636,670,705,636,637,672,637,707,707,602,675,672,704,637,704,607,704,639,638,671,639,639,670,636,704,637,671,637,705,637,670,640,635,671,638,672,671,671,605,672,703,670,636,670,670,668,705,605,637,636,669,705,600,704,637,637,670,704,612,663,672,703,638,700,637,673,705,638,703,603,604,672,703,672,604,637,636,669,704,636,705,640,673,640,639,672,635,705,634,672,637,704,637,670,637,706,603,706,604,638,637,674,638,704,639,670,672,672,636,706,641,672,639,640,670,637,703,638,670,673,670,703,637,670,637,703,636,673,670,670,640,671,636,704,606,671,670,703,638,671,639,703,637,671,638,706,641,673,664,670,640,638,670,637,670,638,704,603,704,638,639,676,669,672,638,642,670,703,636,670,671,669,637,669,634,705,604,637,710,603,636,669,639,707,602,704,636,639,671,706,637,638,671,673,674,640,704,641,666,638,705,636,671,637,670,669,671,703,640,702,604,705,638,638,672,704,603,669,671,705,637,638,671,636,673,637,705,603,704,638,638,673,670,669,705,642,640,670,706,635,636,673,639,642,671,639,637,668,638,671,672,672,639,703,640,671,637,638,671,703,638,706,603,634,670,638,636,670,702,605,670,671,703,640,703,605,703,636,705,602,705,639,705,606,703,638,702,636,671,637,670,702,639,703,603,703,637,603,705,637,704,604,705,648,599,703,604,640,703,635,672,639,706,604,671,669,634,671,637,670,674,670,643,636,672,704,634,636,674,701,637,669,636,701,639,671,703,637,703,603,705,637,705,603,704,636,705,637,672,636,639,671"; // Ton premier énorme bloc ici
@@ -71,9 +101,9 @@ public class ClickAnalyzer {
     }
 
     public static void look(String session, String raw) {
-        System.out.println("\n=== Conclusion ===");
-        var result = analyzeSession(session, parse(raw));
-        if (result) {
+        System.out.println("\n=== Conclusion " + session + " ===");
+        var result = analyzeSession(parse(raw));
+        if (result.isCheat()) {
             System.out.println("❌ Session suspecte : comportement artificiel détecté.");
         } else {
             System.out.println("✅ Session naturelle : comportement humain détecté.");
