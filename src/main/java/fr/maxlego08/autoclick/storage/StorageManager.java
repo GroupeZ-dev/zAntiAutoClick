@@ -211,6 +211,7 @@ public class StorageManager {
             var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.getDifferences());
             clickSession.setId(session.id());
             invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
+            clickSessions.add(clickSession);
         }
         return clickSessions;
     }

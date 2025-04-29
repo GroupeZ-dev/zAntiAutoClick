@@ -84,6 +84,8 @@ public class SessionManager extends ZUtils implements Listener {
                             session.setInvalidSession(invalidSession);
                             this.sendActions(Config.endCheatSessionActions, player, session);
                         });
+                    } else {
+                        this.sendActions(Config.endSessionActions, player, session);
                     }
                 });
             });
@@ -218,8 +220,9 @@ public class SessionManager extends ZUtils implements Listener {
         var percents = result.percent();
 
         var placeholders = new Placeholders();
-        placeholders.register("player", player.getName());
+        placeholders.register("clicker", player.getName());
         placeholders.register("uuid", player.getUniqueId().toString());
+        placeholders.register("clicks", format.format(session.getDifferences().size()));
         placeholders.register("average", format.format(average));
         placeholders.register("median", format.format(median));
         placeholders.register("standard-deviation", format.format(standardDeviation));
@@ -234,7 +237,7 @@ public class SessionManager extends ZUtils implements Listener {
         placeholders.register("s", sessions.size() == 1 ? "" : "s");
         placeholders.register("invalid-sessions", String.valueOf(sessions.stream().filter(ClickSession::isCheat).count()));
 
-        this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
+        this.plugin.getServer().getScheduler().runTask(this.plugin, () -> {
             for (Action action : actions) {
                 action.preExecute(player, null, fakeInventory, placeholders);
             }

@@ -96,37 +96,73 @@ analyze:
   max-score: 100.0
 
 actions:
-  # Actions lorsqu'un joueur termine une session
-  end-session: [ ]
-
-  end-cheat-session:
+  # Actions when a player ends a session and it is valid
+  end-session:
     - type: discord
-      webhook: "https://discord.com/api/webhooks/1223998796027920415/BHfaVIwfyrhIMxpINuWV_L5OKe_m07Xq6WvNN19uwthe76uNncBzSdlcEI18JCVeS0iJ"
+      webhook: "https://discord.com/api/webhooks/1223998796027920415/<webhook>"
       embeds:
-        - color: '#e4162e'
+        - color: '#77ff77'
           footer:
             text: 'zAntiAutoClick'
             icon-url: 'https://img.groupez.dev/PP7.png'
           author:
-            name: '%player%'
+            name: '%clicker%'
             icon-url: 'https://mc-heads.net/head/%uuid%'
           fields:
-            - name: 'Pourcentage'
+            - name: 'Percent'
               value: '%percent%'
               inline: true
-            - name: 'Médianne'
+            - name: 'Median'
               value: '%median%'
               inline: true
-            - name: 'Moyenne'
+            - name: 'Average'
               value: '%average%'
               inline: true
-            - name: 'Écart Type'
+            - name: 'Standard Deviation'
               value: '%standard-deviation%'
               inline: true
-            - name: 'Durée'
+            - name: 'Duration'
               value: '%duration%'
               inline: true
-            - name: 'Nombre de triches'
+            - name: 'Invalid Sessions'
+              value: '%invalid-sessions%/%sessions% session%s%'
+              inline: true
+
+  # Actions lorsqu'un joueur termine une session et qu'elle est invalide
+  end-cheat-session:
+    - type: broadcast
+      requirements:
+        - type: permission
+          permission: 'zantiautoclick.staff.notif'
+      messages:
+        - "&8(&6zAntiAutoClick&8) #77ff77Autoclick detection of the player &f%player% &8(&7Session id&8: &f%id%&8)"
+    - type: discord
+      webhook: "https://discord.com/api/webhooks/1223998796027920415/<webhook>"
+      embeds:
+        - color: '#ff3535'
+          footer:
+            text: 'zAntiAutoClick'
+            icon-url: 'https://img.groupez.dev/PP7.png'
+          author:
+            name: '%clicker%'
+            icon-url: 'https://mc-heads.net/head/%uuid%'
+          fields:
+            - name: 'Percent'
+              value: '%percent%'
+              inline: true
+            - name: 'Median'
+              value: '%median%'
+              inline: true
+            - name: 'Average'
+              value: '%average%'
+              inline: true
+            - name: 'Standard Deviation'
+              value: '%standard-deviation%'
+              inline: true
+            - name: 'Duration'
+              value: '%duration%'
+              inline: true
+            - name: 'Invalid Sessions'
               value: '%invalid-sessions%/%sessions% session%s%'
               inline: true
 
