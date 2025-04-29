@@ -71,6 +71,7 @@ public final class ClickPlugin extends ZPlugin {
 
     public void reloadFiles() {
         this.reloadConfig();
+        Config.load(getConfig(), this);
     }
 
     public InventoryManager getInventoryManager() {

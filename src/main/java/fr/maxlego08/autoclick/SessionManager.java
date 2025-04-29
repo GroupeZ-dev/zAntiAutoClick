@@ -222,6 +222,7 @@ public class SessionManager extends ZUtils implements Listener {
         var placeholders = new Placeholders();
         placeholders.register("clicker", player.getName());
         placeholders.register("uuid", player.getUniqueId().toString());
+        placeholders.register("id", String.valueOf(session.getId()));
         placeholders.register("clicks", format.format(session.getDifferences().size()));
         placeholders.register("average", format.format(average));
         placeholders.register("median", format.format(median));

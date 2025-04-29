@@ -32,8 +32,8 @@ database-configuration:
 # Session configuration
 session:
 
-  # If the click is too fast, it will not be considered (500ms).
-  minimum-delay: 500
+  # If the click is too fast, it will not be considered (400ms).
+  minimum-delay: 400
 
   # End of session (50 ticks, 2.5s).
   # Allows ending the click session on player for later analysis.

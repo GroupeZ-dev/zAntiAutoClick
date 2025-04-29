@@ -30,12 +30,12 @@ public enum Message {
     CLEAN("&aThe database has been cleaned."),
     SESSION_INFORMATION(
             "&fUUID&8: &7%uuid% &8(&7id: %id%&8)",
-            "&fMédiane&8: &7%median%ms",
-            "&fMoyenne&8: &7%average%ms",
-            "&fÉcart type&8: %color%%standard-deviation%",
-            "&fDurée&8: &7%duration%",
-            "&fPourcentage&8: %color-percent%%percent%%",
-            "&fEst un tricheur&8: %color-cheat%%cheat%"
+            "&fMedian&8: &7%median%ms",
+            "&fAverage&8: &7%average%ms",
+            "&fStandard Deviation&8: %color%%standard-deviation%",
+            "&fDuration&8: &7%duration%",
+            "&fPercent&8: %color-percent%%percent%%",
+            "&fIs a cheater&8: %color-cheat%%cheat%"
     );
 
     private List<String> messages;
