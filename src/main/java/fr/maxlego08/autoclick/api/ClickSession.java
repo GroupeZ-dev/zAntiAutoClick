@@ -15,4 +15,18 @@ public interface ClickSession {
 
     boolean isValid();
 
+    double getCheatPercent();
+
+    double getMedian();
+
+    double getAverage();
+
+    double getStandardDivision();
+
+    UUID getVerifiedBy();
+
+    long getVerifiedAt();
+
+    boolean isCheat();
+
 }

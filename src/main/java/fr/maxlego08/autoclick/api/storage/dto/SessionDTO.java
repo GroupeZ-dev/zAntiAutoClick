@@ -26,6 +26,36 @@ public record SessionDTO(int id, UUID unique_id, String differences, Date starte
     }
 
     @Override
+    public double getCheatPercent() {
+        return 0;
+    }
+
+    @Override
+    public double getMedian() {
+        return 0;
+    }
+
+    @Override
+    public double getAverage() {
+        return 0;
+    }
+
+    @Override
+    public double getStandardDivision() {
+        return 0;
+    }
+
+    @Override
+    public UUID getVerifiedBy() {
+        return null;
+    }
+
+    @Override
+    public long getVerifiedAt() {
+        return 0;
+    }
+
+    @Override
     public int getId() {
         return this.id;
     }
@@ -33,5 +63,10 @@ public record SessionDTO(int id, UUID unique_id, String differences, Date starte
     @Override
     public UUID getUniqueId() {
         return this.unique_id;
+    }
+
+    @Override
+    public boolean isCheat() {
+        return false;
     }
 }

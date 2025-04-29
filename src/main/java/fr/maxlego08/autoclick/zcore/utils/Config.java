@@ -1,6 +1,13 @@
 package fr.maxlego08.autoclick.zcore.utils;
 
+import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.menu.api.requirement.Action;
 import org.bukkit.configuration.file.FileConfiguration;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Config {
 
@@ -8,7 +15,7 @@ public class Config {
 
     // Session
     public static int minimumDelay = 500;
-    public static int sessionEndAfter = 5000;
+    public static int sessionEndAfter = 50;
     public static int minimumSessionDuration = 60000;
     public static int minimumSessionClicks = 40;
 
@@ -39,15 +46,18 @@ public class Config {
 
     public static double noLargeJumpBonus = 15.0;
 
-    public static void load(FileConfiguration configuration) {
+    public static List<Action> endSessionActions = new ArrayList<>();
+    public static List<Action> endCheatSessionActions = new ArrayList<>();
+
+    public static void load(FileConfiguration configuration, ClickPlugin plugin) {
 
         debug = configuration.getBoolean("debug", false);
 
         // Session
         minimumDelay = configuration.getInt("session.minimum-delay", 500);
-        sessionEndAfter = configuration.getInt("session.session-end-after", 5000);
-        minimumSessionDuration = configuration.getInt("session.minimum-session-duration", 60000);
-        minimumSessionClicks = configuration.getInt("session.minimum-session-clicks", 40);
+        sessionEndAfter = configuration.getInt("session.end-after", 50);
+        minimumSessionDuration = configuration.getInt("session.minimum-duration", 60000);
+        minimumSessionClicks = configuration.getInt("session.minimum-clicks", 40);
 
         // Analyse
         sessionTrimmed = configuration.getDouble("analyze.session-trimmed", 0.05);
@@ -75,6 +85,11 @@ public class Config {
         top3FrequencyMultiplier = configuration.getDouble("analyze.scoring.top3-frequency.multiplier", 0.3);
 
         noLargeJumpBonus = configuration.getDouble("analyze.scoring.no-large-jump-bonus", 15.0);
+
+        endSessionActions = plugin.getButtonManager().loadActions((List<Map<String, Object>>) configuration.getList("actions.end-session"), "end-session", new File(plugin.getDataFolder(), "config.yml"));
+        endCheatSessionActions = plugin.getButtonManager().loadActions((List<Map<String, Object>>) configuration.getList("actions.end-cheat-session"), "end-cheat-session", new File(plugin.getDataFolder(), "config.yml"));
+
+        System.out.println(endSessionActions.size() + " - " + endCheatSessionActions.size());
     }
 }
 

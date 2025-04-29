@@ -2,10 +2,12 @@ package fr.maxlego08.autoclick.storage;
 
 import fr.maxlego08.autoclick.ClickPlugin;
 import fr.maxlego08.autoclick.Session;
+import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.api.result.AnalyzeResult;
 import fr.maxlego08.autoclick.api.result.SessionResult;
 import fr.maxlego08.autoclick.api.storage.StorageType;
 import fr.maxlego08.autoclick.api.storage.Tables;
+import fr.maxlego08.autoclick.api.storage.dto.InvalidSessionDTO;
 import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.migrations.InvalidSessionMigration;
 import fr.maxlego08.autoclick.migrations.SessionMigration;
@@ -20,6 +22,7 @@ import fr.maxlego08.sarah.logger.JULogger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -99,13 +102,13 @@ public class StorageManager {
      * @param uuid    The id of the session to insert.
      * @param session The session to insert.
      */
-    public void insertSession(UUID uuid, Session session) {
+    public void insertSession(UUID uuid, Session session, Consumer<Integer> consumer) {
         this.async(() -> this.requestHelper.insert(Tables.SESSIONS, table -> {
             table.uuid("unique_id", uuid);
             table.string("differences", session.getDifferences().stream().map(String::valueOf).collect(Collectors.joining(",")));
             table.object("started_at", new Date(session.getStartedAt()));
             table.object("finished_at", new Date(session.getFinishedAt()));
-        }));
+        }, consumer));
     }
 
     /**
@@ -114,18 +117,18 @@ public class StorageManager {
      * This method will insert an invalid session into the database with the given session id and analysis results.
      * </p>
      *
-     * @param session      The session to insert.
+     * @param session       The session to insert.
      * @param sessionResult The session result of the session.
      * @param analyzeResult The analyze result of the session.
      */
-    public void insertInvalidSession(Session session, SessionResult sessionResult, AnalyzeResult analyzeResult) {
+    public void insertInvalidSession(Session session, SessionResult sessionResult, AnalyzeResult analyzeResult, Consumer<InvalidSessionDTO> consumer) {
         this.async(() -> this.requestHelper.insert(Tables.INVALID_SESSIONS, table -> {
             table.bigInt("session_id", session.getId());
             table.decimal("result", analyzeResult.percent());
             table.decimal("average", sessionResult.average());
             table.decimal("median", sessionResult.median());
             table.decimal("standard_deviation", sessionResult.standardDeviation());
-        }));
+        }, id -> consumer.accept(new InvalidSessionDTO(id, session.getId(), analyzeResult.percent(), sessionResult.average(), sessionResult.median(), sessionResult.standardDeviation(), null, null))));
     }
 
     /**
@@ -195,4 +198,22 @@ public class StorageManager {
     public void select(Consumer<List<SessionDTO>> consumer) {
         async(() -> consumer.accept(select()));
     }
+
+    public List<ClickSession> getSessions(UUID uniqueId) {
+
+        var sessions = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.where("unique_id", uniqueId));
+        var ids = sessions.stream().map(e -> String.valueOf(e.id())).toList();
+
+        var invalidSessions = this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereIn("session_id", ids));
+
+        List<ClickSession> clickSessions = new ArrayList<>();
+        for (SessionDTO session : sessions) {
+            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.getDifferences());
+            clickSession.setId(session.id());
+            invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
+        }
+        return clickSessions;
+    }
+
+
 }

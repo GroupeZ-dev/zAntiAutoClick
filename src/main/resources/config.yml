@@ -94,3 +94,39 @@ analyze:
 
   # Maximum possible score (do not exceed)
   max-score: 100.0
+
+actions:
+  # Actions lorsqu'un joueur termine une session
+  end-session: [ ]
+
+  end-cheat-session:
+    - type: discord
+      webhook: "https://discord.com/api/webhooks/1223998796027920415/BHfaVIwfyrhIMxpINuWV_L5OKe_m07Xq6WvNN19uwthe76uNncBzSdlcEI18JCVeS0iJ"
+      embeds:
+        - color: '#e4162e'
+          footer:
+            text: 'zAntiAutoClick'
+            icon-url: 'https://img.groupez.dev/PP7.png'
+          author:
+            name: '%player%'
+            icon-url: 'https://mc-heads.net/head/%uuid%'
+          fields:
+            - name: 'Pourcentage'
+              value: '%percent%'
+              inline: true
+            - name: 'Médianne'
+              value: '%median%'
+              inline: true
+            - name: 'Moyenne'
+              value: '%average%'
+              inline: true
+            - name: 'Écart Type'
+              value: '%standard-deviation%'
+              inline: true
+            - name: 'Durée'
+              value: '%duration%'
+              inline: true
+            - name: 'Nombre de triches'
+              value: '%invalid-sessions%/%sessions% session%s%'
+              inline: true
+

@@ -6,7 +6,11 @@ import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.zcore.utils.ZUtils;
+import fr.maxlego08.menu.api.requirement.Action;
+import fr.maxlego08.menu.api.utils.Placeholders;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -44,14 +48,18 @@ public class SessionManager extends ZUtils implements Listener {
         }
 
         var task = session.getTask();
-        if (task != null) task.cancel();
+        if (task != null) {
+            task.cancel();
+        }
 
-        session.setTask(this.plugin.getServer().getScheduler().runTaskLater(plugin, () -> this.endSession(uuid, session), Config.sessionEndAfter));
+        var scheduler = this.plugin.getServer().getScheduler();
+        session.setTask(scheduler.runTaskLater(this.plugin, () -> this.endSession(uuid, session), Config.sessionEndAfter));
         session.setLastClickAt(now);
     }
 
     private void endSession(UUID uuid, Session session) {
 
+        var player = Bukkit.getPlayer(uuid);
         session.setFinishedAt(System.currentTimeMillis());
         sessions.remove(uuid);
 
@@ -59,25 +67,32 @@ public class SessionManager extends ZUtils implements Listener {
 
         // Si la session est valide, on va l'enregistrer
         if (session.isValid()) {
-            storage.insertSession(uuid, session);
-            this.plugin.getLogger().info(uuid + " vient de terminer une session de " + session.count() + " cliques. Durée: " + (session.getDuration() / 1000) + "s.");
+            storage.insertSession(uuid, session, id -> {
+                session.setId(id);
+                this.plugin.getLogger().info(uuid + " vient de terminer une session de " + session.count() + " cliques. Durée: " + (session.getDuration() / 1000) + "s.");
+
+                var scheduler = this.plugin.getServer().getScheduler();
+                scheduler.runTaskAsynchronously(this.plugin, () -> {
+
+                    var analyzeResult = ClickAnalyzer.analyzeSession(session.getDifferences());
+
+                    if (analyzeResult.isCheat()) {
+
+                        var sessionResult = this.verifySession(session);
+                        this.plugin.getLogger().info("La session de " + uuid + " (id: " + session.getId() + ") est considéré comme une session d'auto-click.");
+                        storage.insertInvalidSession(session, sessionResult, analyzeResult, invalidSession -> {
+                            session.setInvalidSession(invalidSession);
+                            this.sendActions(Config.endCheatSessionActions, player, session);
+                        });
+                    }
+                });
+            });
         }
 
         var task = session.getTask();
         if (task != null) task.cancel();
         session.setTask(null);
 
-        this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
-
-            var analyzeResult = ClickAnalyzer.analyzeSession(session.getDifferences());
-
-            if (analyzeResult.isCheat()) {
-
-                var sessionResult = this.verifySession(session);
-                this.plugin.getLogger().info("La session de " + uuid + " (id: " + session.getId() + ") est considéré comme une session d'auto-click.");
-                storage.insertInvalidSession(session, sessionResult, analyzeResult);
-            }
-        });
     }
 
     /**
@@ -155,15 +170,7 @@ public class SessionManager extends ZUtils implements Listener {
         var result = ClickAnalyzer.analyzeSession(intervals);
         var percents = result.percent();
 
-        message(sender, Message.SESSION_INFORMATION, "%uuid%", session.getUniqueId().toString(), "%id%", session.getId(),
-                "%average%", format.format(average),
-                "%median%", format.format(median),
-                "%color%", standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a",
-                "%standard-deviation%", format.format(standardDeviation),
-                "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds),
-                "%percent%", format.format(percents),
-                "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a", "%cheat%",
-                result.isCheat() ? "Oui" : "Non", "%color-cheat%", result.isCheat() ? "§2" : "§4");
+        message(sender, Message.SESSION_INFORMATION, "%uuid%", session.getUniqueId().toString(), "%id%", session.getId(), "%average%", format.format(average), "%median%", format.format(median), "%color%", standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a", "%standard-deviation%", format.format(standardDeviation), "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds), "%percent%", format.format(percents), "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a", "%cheat%", result.isCheat() ? "Oui" : "Non", "%color-cheat%", result.isCheat() ? "§2" : "§4");
     }
 
 
@@ -191,5 +198,46 @@ public class SessionManager extends ZUtils implements Listener {
         } else {
             return sorted.get(middle);
         }
+    }
+
+    private void sendActions(List<Action> actions, Player player, ClickSession session) {
+
+        var fakeInventory = this.plugin.getInventoryManager().getFakeInventory();
+        var format = new DecimalFormat("#.##");
+
+        long duration = session.getDuration();
+        var intervals = session.getDifferences();
+        var sessionResult = verifySession(session);
+        var average = sessionResult.average();
+        var median = sessionResult.median();
+        var standardDeviation = sessionResult.standardDeviation();
+        long hours = duration / 3600000;
+        long minutes = (duration % 3600000) / 60000;
+        long seconds = (duration % 60000) / 1000;
+        var result = ClickAnalyzer.analyzeSession(intervals);
+        var percents = result.percent();
+
+        var placeholders = new Placeholders();
+        placeholders.register("player", player.getName());
+        placeholders.register("uuid", player.getUniqueId().toString());
+        placeholders.register("average", format.format(average));
+        placeholders.register("median", format.format(median));
+        placeholders.register("standard-deviation", format.format(standardDeviation));
+        placeholders.register("hours", String.valueOf(hours));
+        placeholders.register("minutes", String.valueOf(minutes));
+        placeholders.register("seconds", String.valueOf(seconds));
+        placeholders.register("duration", String.format("%02d:%02d:%02d", hours, minutes, seconds));
+        placeholders.register("percent", format.format(percents));
+
+        var sessions = this.plugin.getStorageManager().getSessions(player.getUniqueId());
+        placeholders.register("sessions", String.valueOf(sessions.size()));
+        placeholders.register("s", sessions.size() == 1 ? "" : "s");
+        placeholders.register("invalid-sessions", String.valueOf(sessions.stream().filter(ClickSession::isCheat).count()));
+
+        this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            for (Action action : actions) {
+                action.preExecute(player, null, fakeInventory, placeholders);
+            }
+        });
     }
 }

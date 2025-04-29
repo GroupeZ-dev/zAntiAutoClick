@@ -8,6 +8,8 @@ import fr.maxlego08.autoclick.storage.StorageManager;
 import fr.maxlego08.autoclick.zcore.ZPlugin;
 import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.zcore.utils.plugins.Metrics;
+import fr.maxlego08.menu.api.ButtonManager;
+import fr.maxlego08.menu.api.InventoryManager;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 
 import java.util.List;
@@ -17,6 +19,9 @@ public final class ClickPlugin extends ZPlugin {
     private final StorageManager storageManager = new StorageManager(this);
     private final SessionManager sessionManager = new SessionManager(this);
     private final CommandManager commandManager = new CommandManager(this);
+
+    private InventoryManager inventoryManager;
+    private ButtonManager buttonManager;
 
     @Override
     public void onLoad() {
@@ -29,7 +34,10 @@ public final class ClickPlugin extends ZPlugin {
 
         this.saveDefaultConfig();
 
-        Config.load(getConfig());
+        this.inventoryManager = getProvider(InventoryManager.class);
+        this.buttonManager = getProvider(ButtonManager.class);
+
+        Config.load(getConfig(), this);
 
         PacketEvents.getAPI().init();
         PacketEvents.getAPI().getEventManager().registerListener(new ClickListener(this), PacketListenerPriority.LOW);
@@ -63,5 +71,13 @@ public final class ClickPlugin extends ZPlugin {
 
     public void reloadFiles() {
         this.reloadConfig();
+    }
+
+    public InventoryManager getInventoryManager() {
+        return inventoryManager;
+    }
+
+    public ButtonManager getButtonManager() {
+        return buttonManager;
     }
 }

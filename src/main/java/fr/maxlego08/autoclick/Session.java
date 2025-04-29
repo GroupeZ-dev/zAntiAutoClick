@@ -1,6 +1,7 @@
 package fr.maxlego08.autoclick;
 
 import fr.maxlego08.autoclick.api.ClickSession;
+import fr.maxlego08.autoclick.api.storage.dto.InvalidSessionDTO;
 import fr.maxlego08.autoclick.zcore.utils.Config;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -10,17 +11,27 @@ import java.util.UUID;
 
 public class Session implements ClickSession {
 
-    private final UUID uuid;
+    private final UUID uniqueId;
     private final long startedAt;
-    private final List<Integer> differences = new ArrayList<>();
+    private final List<Integer> differences;
     private long finishedAt;
 
+    private InvalidSessionDTO invalidSession;
+
+    private int id = -1;
     private long lastClickAt;
     private BukkitTask task;
 
-    public Session(UUID uuid, long startedAt) {
-        this.uuid = uuid;
+    public Session(UUID uniqueId, long startedAt) {
+        this.uniqueId = uniqueId;
         this.startedAt = startedAt;
+        this.differences = new ArrayList<>();
+    }
+
+    public Session(UUID uniqueId, long startedAt, List<Integer> differences) {
+        this.uniqueId = uniqueId;
+        this.startedAt = startedAt;
+        this.differences = differences;
     }
 
     public long getStartedAt() {
@@ -76,12 +87,59 @@ public class Session implements ClickSession {
     }
 
     @Override
+    public double getCheatPercent() {
+        return this.invalidSession == null ? 0.0 : this.invalidSession.result();
+    }
+
+    @Override
+    public double getMedian() {
+        return this.invalidSession == null ? 0.0 : this.invalidSession.median();
+    }
+
+    @Override
+    public double getAverage() {
+        return this.invalidSession == null ? 0.0 : this.invalidSession.average();
+    }
+
+    @Override
+    public double getStandardDivision() {
+        return this.invalidSession == null ? 0.0 : this.invalidSession.standard_deviation();
+    }
+
+    @Override
+    public UUID getVerifiedBy() {
+        return this.invalidSession == null ? null : this.invalidSession.verified_by();
+    }
+
+    @Override
+    public long getVerifiedAt() {
+        return this.invalidSession == null ? 0 : this.invalidSession.verified_at();
+    }
+
+    @Override
     public UUID getUniqueId() {
-        return this.uuid;
+        return this.uniqueId;
     }
 
     @Override
     public int getId() {
-        return -1;
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public InvalidSessionDTO getInvalidSession() {
+        return invalidSession;
+    }
+
+    public void setInvalidSession(InvalidSessionDTO invalidSession) {
+        this.invalidSession = invalidSession;
+    }
+
+    @Override
+    public boolean isCheat() {
+        return this.invalidSession != null;
     }
 }
