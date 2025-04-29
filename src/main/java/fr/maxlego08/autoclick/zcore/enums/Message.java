@@ -41,7 +41,8 @@ public enum Message {
             "&fDuration&8: &7%duration%",
             "&fPercent&8: %color-percent%%percent%%",
             "&fIs a cheater&8: %color-cheat%%cheat%"
-    );
+    ),
+    SESSION_VERIFIED("&aYou just checked the session &f%id%&a");
 
     private List<String> messages;
     private String message;

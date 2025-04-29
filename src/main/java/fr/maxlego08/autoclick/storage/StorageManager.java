@@ -21,6 +21,7 @@ import fr.maxlego08.sarah.database.DatabaseType;
 import fr.maxlego08.sarah.logger.JULogger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -235,5 +236,13 @@ public class StorageManager {
             }
             consumer.accept(clickSessions.stream().sorted(Comparator.comparingLong(ClickSession::getStartedAt).reversed()).toList());
         });
+    }
+
+    public void validSession(ClickSession session, Player player) {
+        async(() -> this.requestHelper.update(Tables.INVALID_SESSIONS, table -> {
+            table.uuid("verified_by", player.getUniqueId());
+            table.object("verified_at", new Date());
+            table.where("session_id", session.getId());
+        }));
     }
 }

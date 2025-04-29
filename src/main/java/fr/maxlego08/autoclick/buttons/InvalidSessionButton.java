@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InvalidSessionButton extends ZButton implements PaginateButton {
 
@@ -48,7 +49,7 @@ public class InvalidSessionButton extends ZButton implements PaginateButton {
         if (!(player.getMetadata("zaac-invalid-sessions").getFirst().value() instanceof List<?> list)) return;
         if (list.isEmpty()) return;
 
-        var clickSessions = list.stream().map(e -> (ClickSession) e).toList();
+        var clickSessions = list.stream().map(e -> (ClickSession) e).collect(Collectors.toList());
         var sessionManager = this.plugin.getSessionManager();
 
         paginate(clickSessions, inventory, (slot, session) -> {
@@ -66,9 +67,7 @@ public class InvalidSessionButton extends ZButton implements PaginateButton {
                 itemStack.setItemMeta(skullMeta);
             }
 
-            inventory.addItem(slot, itemStack).setRightClick(e -> {
-
-            }).setLeftClick(e -> {
+            inventory.addItem(slot, itemStack).setRightClick(e -> this.plugin.getSessionManager().validSession(player, session, clickSessions)).setLeftClick(e -> {
 
             });
         });

@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -245,5 +246,13 @@ public class SessionManager extends ZUtils implements Listener {
         placeholders.register("duration", String.format("%02d:%02d:%02d", hours, minutes, seconds));
         placeholders.register("percent", format.format(session.getCheatPercent()));
         return placeholders;
+    }
+
+    public void validSession(Player player, ClickSession session, List<ClickSession> clickSessions) {
+        this.plugin.getStorageManager().validSession(session, player);
+        clickSessions.removeIf(currentSession -> currentSession.getId() == session.getId());
+        player.setMetadata("zaac-invalid-sessions", new FixedMetadataValue(this.plugin, clickSessions));
+        this.plugin.getInventoryManager().openInventory(player, this.plugin, "invalid-sessions");
+        message(player, Message.SESSION_VERIFIED, "%id%", session.getId());
     }
 }
