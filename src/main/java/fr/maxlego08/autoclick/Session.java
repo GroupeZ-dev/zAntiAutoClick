@@ -28,12 +28,14 @@ public class Session implements ClickSession {
         this.differences = new ArrayList<>();
     }
 
-    public Session(UUID uniqueId, long startedAt, List<Integer> differences) {
+    public Session(UUID uniqueId, long startedAt, long finishedAt, List<Integer> differences) {
         this.uniqueId = uniqueId;
         this.startedAt = startedAt;
+        this.finishedAt = finishedAt;
         this.differences = differences;
     }
 
+    @Override
     public long getStartedAt() {
         return startedAt;
     }

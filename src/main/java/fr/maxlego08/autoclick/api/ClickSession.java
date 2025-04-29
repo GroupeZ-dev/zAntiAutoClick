@@ -29,4 +29,6 @@ public interface ClickSession {
 
     boolean isCheat();
 
+    long getStartedAt();
+
 }

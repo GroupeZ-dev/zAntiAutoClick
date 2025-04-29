@@ -2,6 +2,7 @@ package fr.maxlego08.autoclick;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import fr.maxlego08.autoclick.buttons.InvalidSessionButton;
 import fr.maxlego08.autoclick.command.CommandManager;
 import fr.maxlego08.autoclick.command.commands.CommandAntiAutoClick;
 import fr.maxlego08.autoclick.storage.StorageManager;
@@ -10,6 +11,8 @@ import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.zcore.utils.plugins.Metrics;
 import fr.maxlego08.menu.api.ButtonManager;
 import fr.maxlego08.menu.api.InventoryManager;
+import fr.maxlego08.menu.button.loader.NoneLoader;
+import fr.maxlego08.menu.exceptions.InventoryException;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 
 import java.util.List;
@@ -49,6 +52,9 @@ public final class ClickPlugin extends ZPlugin {
 
         new Metrics(this, 25641);
 
+        this.loadButtons();
+        this.loadInventories();
+
         commandManager.validCommands();
     }
 
@@ -72,6 +78,7 @@ public final class ClickPlugin extends ZPlugin {
     public void reloadFiles() {
         this.reloadConfig();
         Config.load(getConfig(), this);
+        this.loadInventories();
     }
 
     public InventoryManager getInventoryManager() {
@@ -80,5 +87,22 @@ public final class ClickPlugin extends ZPlugin {
 
     public ButtonManager getButtonManager() {
         return buttonManager;
+    }
+
+    private void loadButtons() {
+        this.buttonManager.register(new NoneLoader(this, InvalidSessionButton.class, "ZANTIAUTOCLICK_INVALID_SESSIONS"));
+    }
+
+    private void loadInventories() {
+        try {
+            this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/invalid-sessions.yml");
+            this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/main-sessions.yml");
+            this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/player-sessions.yml");
+            this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/players-sessions.yml");
+            this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/verified-invalid-sessions.yml");
+            this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/info-session.yml");
+        } catch (InventoryException exception) {
+            exception.printStackTrace();
+        }
     }
 }

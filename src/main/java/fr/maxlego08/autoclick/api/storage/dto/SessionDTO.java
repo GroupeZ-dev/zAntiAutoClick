@@ -69,4 +69,9 @@ public record SessionDTO(int id, UUID unique_id, String differences, Date starte
     public boolean isCheat() {
         return false;
     }
+
+    @Override
+    public long getStartedAt() {
+        return this.started_at.getTime();
+    }
 }

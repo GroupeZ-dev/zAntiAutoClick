@@ -23,6 +23,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -208,7 +209,7 @@ public class StorageManager {
 
         List<ClickSession> clickSessions = new ArrayList<>();
         for (SessionDTO session : sessions) {
-            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.getDifferences());
+            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
             clickSession.setId(session.id());
             invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
             clickSessions.add(clickSession);
@@ -217,4 +218,22 @@ public class StorageManager {
     }
 
 
+    public void getInvalidSessions(Consumer<List<ClickSession>> consumer) {
+        async(() -> {
+            var invalidSessions = this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereNull("verified_by"));
+            var ids = invalidSessions.stream().map(e -> String.valueOf(e.session_id())).toList();
+            var sessions = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.whereIn("id", ids));
+
+            List<ClickSession> clickSessions = new ArrayList<>();
+            for (SessionDTO session : sessions) {
+                var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
+                clickSession.setId(session.id());
+                invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(e -> {
+                    clickSession.setInvalidSession(e);
+                    clickSessions.add(clickSession);
+                });
+            }
+            consumer.accept(clickSessions.stream().sorted(Comparator.comparingLong(ClickSession::getStartedAt).reversed()).toList());
+        });
+    }
 }

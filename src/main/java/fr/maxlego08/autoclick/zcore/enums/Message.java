@@ -25,6 +25,11 @@ public enum Message {
     DESCRIPTION_SHOW_ALL("Display all sessions"),
     DESCRIPTION_CLEAN("Clean your database"),
     DESCRIPTION_SUSPECT("Display suspect sessions"),
+    DESCRIPTION_OPEN("Open main inventory"),
+    DESCRIPTION_OPEN_INVALID_SESSIONS("Open invalid sessions inventory"),
+    DESCRIPTION_OPEN_VERIFIED_INVALID_SESSIONS("Open verified invalid sessions inventory"),
+    DESCRIPTION_OPEN_PLAYERS_SESSIONS("Open players sessions inventory"),
+    DESCRIPTION_OPEN_PLAYER_SESSIONS("Open a player sessions inventory"),
 
     SESSION_NOT_FOUND("&cImpossible to find the session &f%id%&c."),
     CLEAN("&aThe database has been cleaned."),

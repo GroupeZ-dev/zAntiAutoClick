@@ -88,8 +88,6 @@ public class Config {
 
         endSessionActions = plugin.getButtonManager().loadActions((List<Map<String, Object>>) configuration.getList("actions.end-session"), "end-session", new File(plugin.getDataFolder(), "config.yml"));
         endCheatSessionActions = plugin.getButtonManager().loadActions((List<Map<String, Object>>) configuration.getList("actions.end-cheat-session"), "end-cheat-session", new File(plugin.getDataFolder(), "config.yml"));
-
-        System.out.println(endSessionActions.size() + " - " + endCheatSessionActions.size());
     }
 }
 

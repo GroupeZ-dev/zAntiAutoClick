@@ -172,7 +172,8 @@ public class SessionManager extends ZUtils implements Listener {
         var result = ClickAnalyzer.analyzeSession(intervals);
         var percents = result.percent();
 
-        message(sender, Message.SESSION_INFORMATION, "%uuid%", session.getUniqueId().toString(), "%id%", session.getId(), "%average%", format.format(average), "%median%", format.format(median), "%color%", standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a", "%standard-deviation%", format.format(standardDeviation), "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds), "%percent%", format.format(percents), "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a", "%cheat%", result.isCheat() ? "Oui" : "Non", "%color-cheat%", result.isCheat() ? "§2" : "§4");
+        message(sender, Message.SESSION_INFORMATION, "%uuid%", session.getUniqueId().toString(), "%id%", session.getId(), "%average%", format.format(average), "%median%", format.format(median), "%color%",
+                standardDeviation < 10 ? "§4" : standardDeviation < 20 ? "§4" : standardDeviation < 30 ? "§6" : standardDeviation < 40 ? "§e" : "§a", "%standard-deviation%", format.format(standardDeviation), "%duration%", String.format("%02d:%02d:%02d", hours, minutes, seconds), "%percent%", format.format(percents), "%color-percent%", percents >= 90 ? "§4" : percents >= 80 ? "§c" : percents >= 70 ? "§6" : percents >= 60 ? "§e" : "§a", "%cheat%", result.isCheat() ? "Oui" : "Non", "%color-cheat%", result.isCheat() ? "§2" : "§4");
     }
 
 
@@ -205,33 +206,7 @@ public class SessionManager extends ZUtils implements Listener {
     private void sendActions(List<Action> actions, Player player, ClickSession session) {
 
         var fakeInventory = this.plugin.getInventoryManager().getFakeInventory();
-        var format = new DecimalFormat("#.##");
-
-        long duration = session.getDuration();
-        var intervals = session.getDifferences();
-        var sessionResult = verifySession(session);
-        var average = sessionResult.average();
-        var median = sessionResult.median();
-        var standardDeviation = sessionResult.standardDeviation();
-        long hours = duration / 3600000;
-        long minutes = (duration % 3600000) / 60000;
-        long seconds = (duration % 60000) / 1000;
-        var result = ClickAnalyzer.analyzeSession(intervals);
-        var percents = result.percent();
-
-        var placeholders = new Placeholders();
-        placeholders.register("clicker", player.getName());
-        placeholders.register("uuid", player.getUniqueId().toString());
-        placeholders.register("id", String.valueOf(session.getId()));
-        placeholders.register("clicks", format.format(session.getDifferences().size()));
-        placeholders.register("average", format.format(average));
-        placeholders.register("median", format.format(median));
-        placeholders.register("standard-deviation", format.format(standardDeviation));
-        placeholders.register("hours", String.valueOf(hours));
-        placeholders.register("minutes", String.valueOf(minutes));
-        placeholders.register("seconds", String.valueOf(seconds));
-        placeholders.register("duration", String.format("%02d:%02d:%02d", hours, minutes, seconds));
-        placeholders.register("percent", format.format(percents));
+        Placeholders placeholders = createPlaceholders(session);
 
         var sessions = this.plugin.getStorageManager().getSessions(player.getUniqueId());
         placeholders.register("sessions", String.valueOf(sessions.size()));
@@ -243,5 +218,32 @@ public class SessionManager extends ZUtils implements Listener {
                 action.preExecute(player, null, fakeInventory, placeholders);
             }
         });
+    }
+
+    public Placeholders createPlaceholders(ClickSession session) {
+
+        DecimalFormat format = new DecimalFormat("#.##");
+
+        long duration = session.getDuration();
+        long hours = duration / 3600000;
+        long minutes = (duration % 3600000) / 60000;
+        long seconds = (duration % 60000) / 1000;
+
+        var offlinePlayer = Bukkit.getOfflinePlayer(session.getUniqueId());
+
+        Placeholders placeholders = new Placeholders();
+        placeholders.register("clicker", offlinePlayer.getName() == null ? "Unknown" : offlinePlayer.getName());
+        placeholders.register("uuid", session.getUniqueId().toString());
+        placeholders.register("id", String.valueOf(session.getId()));
+        placeholders.register("clicks", format.format(session.getDifferences().size()));
+        placeholders.register("average", format.format(session.getAverage()));
+        placeholders.register("median", format.format(session.getMedian()));
+        placeholders.register("standard-deviation", format.format(session.getStandardDivision()));
+        placeholders.register("hours", String.valueOf(hours));
+        placeholders.register("minutes", String.valueOf(minutes));
+        placeholders.register("seconds", String.valueOf(seconds));
+        placeholders.register("duration", String.format("%02d:%02d:%02d", hours, minutes, seconds));
+        placeholders.register("percent", format.format(session.getCheatPercent()));
+        return placeholders;
     }
 }
