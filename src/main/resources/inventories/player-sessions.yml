@@ -1,0 +1,48 @@
+name: "&8%target% Sessions %page%/%max-page%"
+size: 54
+items:
+  back:
+    type: INVENTORY
+    inventory: players-sessions
+    slot: 49
+    item:
+      material: BARRIER
+      name: "&cBack"
+
+  previous:
+    type: PREVIOUS
+    slot: 48
+    item:
+      material: PAPER
+      name: "&fPrevious page"
+
+  next:
+    type: NEXT
+    slot: 50
+    item:
+      material: PAPER
+      name: "&fNext page"
+
+  invalid-sessions:
+    type: ZANTIAUTOCLICK_PLAYER
+    slots:
+      - 0-44
+    item:
+      material: PLAYER_HEAD
+      name: '&f%clicker% &8(&7%id%&8)'
+      lore:
+        - ""
+        - "&fAverage&8: &a%average%ms"
+        - "&fMedian&8: &a%median%ms"
+        - "&fStandard Deviation&8: %standard-deviation-color%%standard-deviation%ms"
+        - "&fPercent&8: %percent-color%%percent%%"
+        - "&fDuration&8: &7%duration%"
+        - "&fClicks&8: &7%clicks%"
+        - ""
+        - '&aClick&f to view session'
+    else:
+      slots:
+        - 22
+      item:
+        material: BARRIER
+        name: "&cNo Clicks Found"

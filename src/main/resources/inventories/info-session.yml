@@ -1,0 +1,38 @@
+name: "&8Session %id%"
+size: 54
+items:
+  back:
+    type: BACK
+    slot: 49
+    item:
+      material: BARRIER
+      name: "&cBack"
+
+  previous:
+    type: PREVIOUS
+    slot: 48
+    item:
+      material: PAPER
+      name: "&fPrevious page"
+
+  next:
+    type: NEXT
+    slot: 50
+    item:
+      material: PAPER
+      name: "&fNext page"
+
+  invalid-sessions:
+    type: ZANTIAUTOCLICK_CLICKS
+    slots:
+      - 0-44
+    item:
+      material: PAPER
+      name: ''
+      lore:
+        - "%clicks%"
+      slots:
+        - 22
+      item:
+        material: BARRIER
+        name: "&cNo Clicks Found"

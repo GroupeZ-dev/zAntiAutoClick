@@ -1,9 +1,171 @@
-# Permet de debug SQL
-sql-debug: true
+debug: false
 
-# Si le clic est trop rapide, on ne va pas le prendre en compte (500ms).
-minimum-delay: 500
+# Storage:
+# SQLITE - For the launch of the plugin only.
+# HIKARICP - RECOMMENDED - HikariCP is a fast and lightweight JDBC connection pool. It optimizes database connections, ensuring quick acquisition and low latency. This improves performance and reliability, making it ideal for high-demand applications.
+#
+# We advise you to use HIKARICP, the SQLITE storage is only there to install the plugin and do some tests, not all features are available with SQLITE yet.
+# The plugin will work, but some features like sanctions update when launching the plugin will not work.
+# This will be fixed in future plugin updates
+storage-type: SQLITE
 
-# Fin de la session (50 ticks, 2.5s).
-# Permet de mettre fin à la session de clic sur joueur pour une analyse postérieure.
-session-end-after: 50
+# Configuration of your database, it is recommended to use the database to store your data.
+database-configuration:
+  # The prefix that will be applied to all tables,
+  # if you have several plugins with the same database, you must have one.
+  # It is advisable not to change this value
+  table-prefix: "zantiautoclick_"
+  # IP Address of the machine the database is hosted on
+  host: 192.168.10.10
+  # Port of the database, by default, MYSQL's port is 3306
+  port: 3306
+  # Database username
+  user: homestead
+  # Database password
+  password: 'secret'
+  # Database
+  database: zantiautoclick
+  # Enable of not the SQL debug mode
+  debug: true
+
+date-format: "dd/MM/yyyy HH:mm:ss"
+
+click-lore-line: "&f%click%ms"
+
+# Session configuration
+session:
+
+  # If the click is too fast, it will not be considered (400ms).
+  minimum-delay: 400
+
+  # End of session (50 ticks, 2.5s).
+  # Allows ending the click session on player for later analysis.
+  end-after: 50
+
+  # Minimum session duration (60 seconds).
+  minimum-duration: 60000 # 60 seconds
+
+  # Minimum number of clicks in the session
+  minimum-clicks: 40
+
+# Session analysis
+analyze:
+
+  # Percentage of the session to trim from the ends (e.g., 0.1 = 10%)
+  session-trimmed: 0.1
+
+  # Maximum difference between two clicks to be considered a small variation (in ms)
+  small-variation: 10
+
+  # Minimum difference between two clicks to be considered a large jump (in ms)
+  large-variation: 200
+
+  # Minimum score to consider the session accepted
+  required-score: 60.0
+
+  # Parameters for score calculation:
+
+  scoring:
+    # Influence of small variations
+    small-variation:
+      threshold-percent: 50.0   # Percentage at which points start to be awarded
+      multiplier: 0.5           # Points added per percentage above the threshold
+      max-bonus: 25.0           # Maximum possible bonus
+
+    # Influence of the range
+    range:
+      relative-threshold: 0.3   # % of the average to define a small range
+      max-bonus: 25.0           # Maximum possible bonus
+
+    # Influence of the standard deviation
+    stddev:
+      relative-threshold: 0.1   # % of the average to define a low standard deviation
+      max-bonus: 20.0           # Maximum possible bonus
+
+    # Influence of the frequency of the most common click
+    top1-frequency:
+      threshold-percent: 10.0   # Percentage at which points start to be added
+      multiplier: 0.5           # Points added per percentage above the threshold
+
+    # Influence of the sum of the three most frequent clicks
+    top3-frequency:
+      threshold-percent: 30.0   # Percentage at which points start to be added
+      multiplier: 0.3           # Points added per percentage above the threshold
+
+    # Bonus if no large jump is detected
+    no-large-jump-bonus: 15.0
+
+  # Maximum possible score (do not exceed)
+  max-score: 100.0
+
+actions:
+  # Actions when a player ends a session and it is valid
+  end-session:
+    - type: discord
+      webhook: "https://discord.com/api/webhooks/1223998796027920415/<webhook>"
+      embeds:
+        - color: '#77ff77'
+          footer:
+            text: 'zAntiAutoClick'
+            icon-url: 'https://img.groupez.dev/PP7.png'
+          author:
+            name: '%clicker%'
+            icon-url: 'https://mc-heads.net/head/%uuid%'
+          fields:
+            - name: 'Percent'
+              value: '%percent%'
+              inline: true
+            - name: 'Median'
+              value: '%median%'
+              inline: true
+            - name: 'Average'
+              value: '%average%'
+              inline: true
+            - name: 'Standard Deviation'
+              value: '%standard-deviation%'
+              inline: true
+            - name: 'Duration'
+              value: '%duration%'
+              inline: true
+            - name: 'Invalid Sessions'
+              value: '%invalid-sessions%/%sessions% session%s%'
+              inline: true
+
+  # Actions lorsqu'un joueur termine une session et qu'elle est invalide
+  end-cheat-session:
+    - type: broadcast
+      requirements:
+        - type: permission
+          permission: 'zantiautoclick.staff.notif'
+      messages:
+        - "&8(&6zAntiAutoClick&8) #77ff77Autoclick detection of the player &f%player% &8(&7Session id&8: &f%id%&8)"
+    - type: discord
+      webhook: "https://discord.com/api/webhooks/1223998796027920415/<webhook>"
+      embeds:
+        - color: '#ff3535'
+          footer:
+            text: 'zAntiAutoClick'
+            icon-url: 'https://img.groupez.dev/PP7.png'
+          author:
+            name: '%clicker%'
+            icon-url: 'https://mc-heads.net/head/%uuid%'
+          fields:
+            - name: 'Percent'
+              value: '%percent%'
+              inline: true
+            - name: 'Median'
+              value: '%median%'
+              inline: true
+            - name: 'Average'
+              value: '%average%'
+              inline: true
+            - name: 'Standard Deviation'
+              value: '%standard-deviation%'
+              inline: true
+            - name: 'Duration'
+              value: '%duration%'
+              inline: true
+            - name: 'Invalid Sessions'
+              value: '%invalid-sessions%/%sessions% session%s%'
+              inline: true
+

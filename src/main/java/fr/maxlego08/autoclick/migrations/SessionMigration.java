@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.migrations;
 
-import fr.maxlego08.autoclick.storage.Tables;
+import fr.maxlego08.autoclick.api.storage.Tables;
 import fr.maxlego08.sarah.database.Migration;
 
 public class SessionMigration extends Migration {

@@ -1,0 +1,33 @@
+# Made with https://minecraft-inventory-builder.com/
+name: '&8zAntiAutoClick'
+size: 27
+items:
+  btn-11:
+    slot: 11
+    item:
+      material: BOOK
+      name: '&fInvalid Sessions'
+      lore:
+        - '&8Click to view all invalid sessions '
+        - '&8that have not been verified.'
+    commands:
+      - "zaac invalid-sessions"
+  btn-12:
+    slot: 12
+    item:
+      material: WRITABLE_BOOK
+      name: '&fInvalid Sessions &8(&aVerified&8)'
+      lore:
+        - '&8Click to view all invalid sessions '
+        - '&8that have been verified.'
+    commands:
+      - "zaac verified-invalid-sessions"
+  btn-15:
+    slot: 15
+    item:
+      material: PLAYER_HEAD
+      name: '&fPlayers'
+      lore:
+        - '&8Click to view the sessions of all players.'
+    commands:
+      - "zaac players"
