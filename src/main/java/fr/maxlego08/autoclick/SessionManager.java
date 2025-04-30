@@ -232,19 +232,35 @@ public class SessionManager extends ZUtils implements Listener {
 
         var offlinePlayer = Bukkit.getOfflinePlayer(session.getUniqueId());
 
+        var average = session.getAverage();
+        var median = session.getMedian();
+        var standardDeviation = session.getStandardDivision();
+        var cheatPercent = session.getCheatPercent();
+
+        if (!session.isCheat()) {
+            var result = this.verifySession(session);
+            average = result.average();
+            median = result.median();
+            standardDeviation = result.standardDeviation();
+            cheatPercent = ClickAnalyzer.analyzeSession(session.getDifferences()).percent();
+            session.update(average, median, standardDeviation, cheatPercent);
+        }
+
         Placeholders placeholders = new Placeholders();
         placeholders.register("clicker", offlinePlayer.getName() == null ? "Unknown" : offlinePlayer.getName());
         placeholders.register("uuid", session.getUniqueId().toString());
         placeholders.register("id", String.valueOf(session.getId()));
         placeholders.register("clicks", format.format(session.getDifferences().size()));
-        placeholders.register("average", format.format(session.getAverage()));
-        placeholders.register("median", format.format(session.getMedian()));
-        placeholders.register("standard-deviation", format.format(session.getStandardDivision()));
+        placeholders.register("average", format.format(average));
+        placeholders.register("median", format.format(median));
+        placeholders.register("standard-deviation", format.format(standardDeviation));
         placeholders.register("hours", String.valueOf(hours));
         placeholders.register("minutes", String.valueOf(minutes));
         placeholders.register("seconds", String.valueOf(seconds));
         placeholders.register("duration", String.format("%02d:%02d:%02d", hours, minutes, seconds));
-        placeholders.register("percent", format.format(session.getCheatPercent()));
+        placeholders.register("percent", format.format(cheatPercent));
+        placeholders.register("started-at", Config.simpleDateFormat.format(session.getStartedAt()));
+        placeholders.register("finished-at", Config.simpleDateFormat.format(session.getFinishedAt()));
         return placeholders;
     }
 

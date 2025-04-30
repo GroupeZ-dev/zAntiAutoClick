@@ -30,4 +30,4 @@ items:
       lore:
         - '&8Click to view the sessions of all players.'
     commands:
-      - "zaac players-sessions"
+      - "zaac players"

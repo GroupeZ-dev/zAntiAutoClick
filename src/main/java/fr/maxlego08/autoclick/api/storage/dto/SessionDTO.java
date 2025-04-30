@@ -74,4 +74,14 @@ public record SessionDTO(int id, UUID unique_id, String differences, Date starte
     public long getStartedAt() {
         return this.started_at.getTime();
     }
+
+    @Override
+    public long getFinishedAt() {
+        return this.finished_at.getTime();
+    }
+
+    @Override
+    public void update(double average, double median, double standardDeviation, double cheatPercent) {
+
+    }
 }

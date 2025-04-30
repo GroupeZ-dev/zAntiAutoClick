@@ -22,6 +22,11 @@ public class Session implements ClickSession {
     private long lastClickAt;
     private BukkitTask task;
 
+    private double average;
+    private double median;
+    private double standardDeviation;
+    private double cheatPercent;
+
     public Session(UUID uniqueId, long startedAt) {
         this.uniqueId = uniqueId;
         this.startedAt = startedAt;
@@ -41,10 +46,19 @@ public class Session implements ClickSession {
     }
 
     @Override
+    public void update(double average, double median, double standardDeviation, double cheatPercent) {
+        this.average = average;
+        this.median = median;
+        this.standardDeviation = standardDeviation;
+        this.cheatPercent = cheatPercent;
+    }
+
+    @Override
     public List<Integer> getDifferences() {
         return differences;
     }
 
+    @Override
     public long getFinishedAt() {
         return finishedAt;
     }
@@ -90,22 +104,22 @@ public class Session implements ClickSession {
 
     @Override
     public double getCheatPercent() {
-        return this.invalidSession == null ? 0.0 : this.invalidSession.result();
+        return this.invalidSession == null ? this.cheatPercent : this.invalidSession.result();
     }
 
     @Override
     public double getMedian() {
-        return this.invalidSession == null ? 0.0 : this.invalidSession.median();
+        return this.invalidSession == null ? this.median : this.invalidSession.median();
     }
 
     @Override
     public double getAverage() {
-        return this.invalidSession == null ? 0.0 : this.invalidSession.average();
+        return this.invalidSession == null ? this.average : this.invalidSession.average();
     }
 
     @Override
     public double getStandardDivision() {
-        return this.invalidSession == null ? 0.0 : this.invalidSession.standard_deviation();
+        return this.invalidSession == null ? this.standardDeviation : this.invalidSession.standard_deviation();
     }
 
     @Override

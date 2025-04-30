@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.UUID;
+
 public abstract class SessionHelper extends ZButton {
 
     protected ItemStack createItemStack(Player player, ClickSession session, SessionManager sessionManager) {
@@ -21,9 +23,13 @@ public abstract class SessionHelper extends ZButton {
         onPlaceholder(player, placeholders, session, sessionManager);
 
         var itemStack = getItemStack().build(player, false, placeholders);
+        return updateSkull(itemStack, session.getUniqueId());
+    }
+
+    protected ItemStack updateSkull(ItemStack itemStack, UUID uuid) {
         var meta = itemStack.getItemMeta();
         if (meta instanceof SkullMeta skullMeta) {
-            skullMeta.setPlayerProfile(Bukkit.getOfflinePlayer(session.getUniqueId()).getPlayerProfile());
+            skullMeta.setPlayerProfile(Bukkit.getOfflinePlayer(uuid).getPlayerProfile());
             itemStack.setItemMeta(skullMeta);
         }
         return itemStack;

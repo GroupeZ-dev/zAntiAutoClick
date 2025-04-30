@@ -1,3 +1,44 @@
 name: "&8Players Sessions %page%/%max-page%"
 size: 54
 items:
+  back:
+    type: INVENTORY
+    inventory: main-sessions
+    slot: 49
+    item:
+      material: BARRIER
+      name: "&cBack"
+
+  previous:
+    type: PREVIOUS
+    slot: 48
+    item:
+      material: PAPER
+      name: "&fPrevious page"
+
+  next:
+    type: NEXT
+    slot: 50
+    item:
+      material: PAPER
+      name: "&fNext page"
+
+  invalid-sessions:
+    type: ZANTIAUTOCLICK_PLAYERS
+    slots:
+      - 0-44
+    item:
+      material: PLAYER_HEAD
+      name: '&f%target%'
+      lore:
+        - ""
+        - "&fSessions&8: &7%sessions%"
+        - "&fInvalid Sessions&8: &7%invalid-sessions%"
+        - ""
+        - "&aClick&f to view player's session"
+    else:
+      slots:
+        - 22
+      item:
+        material: BARRIER
+        name: "&cNo Player"

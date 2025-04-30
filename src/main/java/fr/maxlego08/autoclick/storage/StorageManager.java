@@ -11,6 +11,7 @@ import fr.maxlego08.autoclick.api.storage.dto.InvalidSessionDTO;
 import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.migrations.InvalidSessionMigration;
 import fr.maxlego08.autoclick.migrations.SessionMigration;
+import fr.maxlego08.autoclick.zcore.utils.PlayerInfo;
 import fr.maxlego08.sarah.DatabaseConfiguration;
 import fr.maxlego08.sarah.DatabaseConnection;
 import fr.maxlego08.sarah.HikariDatabaseConnection;
@@ -26,7 +27,9 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -224,6 +227,25 @@ public class StorageManager {
 
     public void getVerifiedInvalidSessions(Consumer<List<ClickSession>> consumer) {
         async(() -> verified(this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereNotNull("verified_by")), consumer));
+    }
+
+    public void getPlayers(Consumer<List<PlayerInfo>> consumer) {
+        async(() -> {
+
+            Map<UUID, List<ClickSession>> playerSessions = new HashMap<>();
+
+            var sessions = this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
+            var invalidSessions = this.requestHelper.selectAll(Tables.INVALID_SESSIONS, InvalidSessionDTO.class);
+
+            for (SessionDTO session : sessions) {
+                var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
+                clickSession.setId(session.id());
+                invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
+                playerSessions.computeIfAbsent(session.getUniqueId(), k -> new ArrayList<>()).add(clickSession);
+            }
+
+            consumer.accept(playerSessions.entrySet().stream().map(e -> new PlayerInfo(e.getKey(), e.getValue())).toList());
+        });
     }
 
     private void verified(List<InvalidSessionDTO> invalidSessions, Consumer<List<ClickSession>> consumer) {

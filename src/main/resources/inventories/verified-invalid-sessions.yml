@@ -39,6 +39,8 @@ items:
         - "&fPercent&8: %percent-color%%percent%%"
         - "&fDuration&8: &7%duration%"
         - "&fClicks&8: &7%clicks%"
+        - "&fVerified by&8: &7%verified_by%"
+        - "&fVerified at&8: &7%verified_at%"
         - ""
         - '&aClick&f to view session'
     else:

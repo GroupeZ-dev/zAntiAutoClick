@@ -31,4 +31,7 @@ public interface ClickSession {
 
     long getStartedAt();
 
+    void update(double average, double median, double standardDeviation, double cheatPercent);
+
+    long getFinishedAt();
 }

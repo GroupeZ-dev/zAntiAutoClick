@@ -42,3 +42,9 @@ items:
         - ""
         - '&aLeft click&f to view session'
         - '&aRight click&f to verify session'
+    else:
+      slots:
+        - 22
+      item:
+        material: BARRIER
+        name: "&cNo Invalid Sessions"
