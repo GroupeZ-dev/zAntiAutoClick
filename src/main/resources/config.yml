@@ -28,6 +28,7 @@ database-configuration:
   # Enable of not the SQL debug mode
   debug: true
 
+date-format: "dd/MM/yyyy HH:mm:ss"
 
 # Session configuration
 session:

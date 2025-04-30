@@ -20,6 +20,7 @@ public class CommandAntiAutoClick extends VCommand {
 
         this.addSubCommand(new CommandAntiAutoClickOpen(plugin));
         this.addSubCommand(new CommandAntiAutoClickInvalidSessions(plugin));
+        this.addSubCommand(new CommandAntiAutoClickVerifiedInvalidSessions(plugin));
     }
 
     @Override

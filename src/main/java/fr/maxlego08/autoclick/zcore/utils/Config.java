@@ -5,6 +5,7 @@ import fr.maxlego08.menu.api.requirement.Action;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,8 @@ public class Config {
     public static List<Action> endSessionActions = new ArrayList<>();
     public static List<Action> endCheatSessionActions = new ArrayList<>();
 
+    public static SimpleDateFormat simpleDateFormat;
+
     public static void load(FileConfiguration configuration, ClickPlugin plugin) {
 
         debug = configuration.getBoolean("debug", false);
@@ -88,6 +91,8 @@ public class Config {
 
         endSessionActions = plugin.getButtonManager().loadActions((List<Map<String, Object>>) configuration.getList("actions.end-session"), "end-session", new File(plugin.getDataFolder(), "config.yml"));
         endCheatSessionActions = plugin.getButtonManager().loadActions((List<Map<String, Object>>) configuration.getList("actions.end-cheat-session"), "end-cheat-session", new File(plugin.getDataFolder(), "config.yml"));
+
+        simpleDateFormat = new SimpleDateFormat(configuration.getString("date-format", "dd/MM/yyyy HH:mm:ss"));
     }
 }
 

@@ -3,6 +3,7 @@ package fr.maxlego08.autoclick;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import fr.maxlego08.autoclick.buttons.InvalidSessionButton;
+import fr.maxlego08.autoclick.buttons.VerifiedInvalidSessionButton;
 import fr.maxlego08.autoclick.command.CommandManager;
 import fr.maxlego08.autoclick.command.commands.CommandAntiAutoClick;
 import fr.maxlego08.autoclick.storage.StorageManager;
@@ -91,6 +92,7 @@ public final class ClickPlugin extends ZPlugin {
 
     private void loadButtons() {
         this.buttonManager.register(new NoneLoader(this, InvalidSessionButton.class, "ZANTIAUTOCLICK_INVALID_SESSIONS"));
+        this.buttonManager.register(new NoneLoader(this, VerifiedInvalidSessionButton.class, "ZANTIAUTOCLICK_VERIFIED_INVALID_SESSIONS"));
     }
 
     private void loadInventories() {

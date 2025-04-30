@@ -218,24 +218,28 @@ public class StorageManager {
         return clickSessions;
     }
 
-
     public void getInvalidSessions(Consumer<List<ClickSession>> consumer) {
-        async(() -> {
-            var invalidSessions = this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereNull("verified_by"));
-            var ids = invalidSessions.stream().map(e -> String.valueOf(e.session_id())).toList();
-            var sessions = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.whereIn("id", ids));
+        async(() -> verified(this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereNull("verified_by")), consumer));
+    }
 
-            List<ClickSession> clickSessions = new ArrayList<>();
-            for (SessionDTO session : sessions) {
-                var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
-                clickSession.setId(session.id());
-                invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(e -> {
-                    clickSession.setInvalidSession(e);
-                    clickSessions.add(clickSession);
-                });
-            }
-            consumer.accept(clickSessions.stream().sorted(Comparator.comparingLong(ClickSession::getStartedAt).reversed()).toList());
-        });
+    public void getVerifiedInvalidSessions(Consumer<List<ClickSession>> consumer) {
+        async(() -> verified(this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereNotNull("verified_by")), consumer));
+    }
+
+    private void verified(List<InvalidSessionDTO> invalidSessions, Consumer<List<ClickSession>> consumer) {
+        var ids = invalidSessions.stream().map(e -> String.valueOf(e.session_id())).toList();
+        var sessions = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.whereIn("id", ids));
+
+        List<ClickSession> clickSessions = new ArrayList<>();
+        for (SessionDTO session : sessions) {
+            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
+            clickSession.setId(session.id());
+            invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(e -> {
+                clickSession.setInvalidSession(e);
+                clickSessions.add(clickSession);
+            });
+        }
+        consumer.accept(clickSessions.stream().sorted(Comparator.comparingLong(ClickSession::getStartedAt).reversed()).toList());
     }
 
     public void validSession(ClickSession session, Player player) {
