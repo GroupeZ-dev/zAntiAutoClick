@@ -9,6 +9,7 @@ import fr.maxlego08.menu.api.utils.Placeholders;
 import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
@@ -56,7 +57,9 @@ public class VerifiedInvalidSessionButton extends SessionHelper implements Pagin
 
             var itemStack = createItemStack(player, session, sessionManager);
             inventory.addItem(slot, itemStack).setClick(e -> {
-
+                player.setMetadata("zaac-session", new FixedMetadataValue(plugin, session));
+                var manager = this.plugin.getInventoryManager();
+                manager.getInventory(plugin, "info-session").ifPresentOrElse(i -> manager.openInventoryWithOldInventories(player, i, 1), () -> player.sendMessage("§cImpossible to find the inventory info-session !"));
             });
         });
     }

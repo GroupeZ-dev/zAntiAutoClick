@@ -1,7 +1,6 @@
 package fr.maxlego08.autoclick.buttons;
 
 import fr.maxlego08.autoclick.ClickPlugin;
-import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.zcore.utils.PlayerInfo;
 import fr.maxlego08.menu.api.button.PaginateButton;
 import fr.maxlego08.menu.api.utils.Placeholders;
@@ -10,9 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class PlayerButton extends SessionHelper implements PaginateButton {
 
@@ -64,7 +60,9 @@ public class PlayerButton extends SessionHelper implements PaginateButton {
 
             var itemStack = createItemStack(player, clickSession, sessionManager);
             inventory.addItem(slot, itemStack).setClick(e -> {
-
+                player.setMetadata("zaac-session", new FixedMetadataValue(plugin, clickSession));
+                var manager = this.plugin.getInventoryManager();
+                manager.getInventory(plugin, "info-session").ifPresentOrElse(i -> manager.openInventoryWithOldInventories(player, i, 1), () -> player.sendMessage("§cImpossible to find the inventory info-session !"));
             });
         });
     }

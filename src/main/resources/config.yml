@@ -30,6 +30,8 @@ database-configuration:
 
 date-format: "dd/MM/yyyy HH:mm:ss"
 
+click-lore-line: "&f%click%ms"
+
 # Session configuration
 session:
 

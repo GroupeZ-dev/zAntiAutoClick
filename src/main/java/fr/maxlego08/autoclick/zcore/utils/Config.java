@@ -51,6 +51,7 @@ public class Config {
     public static List<Action> endCheatSessionActions = new ArrayList<>();
 
     public static SimpleDateFormat simpleDateFormat;
+    public static String clickLoreLine;
 
     public static void load(FileConfiguration configuration, ClickPlugin plugin) {
 
@@ -93,6 +94,7 @@ public class Config {
         endCheatSessionActions = plugin.getButtonManager().loadActions((List<Map<String, Object>>) configuration.getList("actions.end-cheat-session"), "end-cheat-session", new File(plugin.getDataFolder(), "config.yml"));
 
         simpleDateFormat = new SimpleDateFormat(configuration.getString("date-format", "dd/MM/yyyy HH:mm:ss"));
+        clickLoreLine = configuration.getString("click-lore-line", "&f%click%ms");
     }
 }
 
