@@ -10,7 +10,7 @@ import java.util.Map;
 
 public enum Message {
 
-    PREFIX("&8(&6AntiAutoClick&8) "),
+    PREFIX("&8(&6zAntiAutoClick&8) "),
 
     COMMAND_SYNTAX_ERROR("&cYou must execute the command like this&7: &a%syntax%"),
     COMMAND_NO_PERMISSION("&cYou do not have permission to run this command."),
@@ -22,6 +22,7 @@ public enum Message {
 
     DESCRIPTION_RELOAD("Reload configuration files"),
     DESCRIPTION_SHOW("Display a session"),
+    DESCRIPTION_SHOW_DURATION("Display all sessions with a specific duration"),
     DESCRIPTION_SHOW_ALL("Display all sessions"),
     DESCRIPTION_CLEAN("Clean your database"),
     DESCRIPTION_SUSPECT("Display suspect sessions"),
@@ -29,7 +30,6 @@ public enum Message {
     DESCRIPTION_OPEN_INVALID_SESSIONS("Open invalid sessions inventory"),
     DESCRIPTION_OPEN_VERIFIED_INVALID_SESSIONS("Open verified invalid sessions inventory"),
     DESCRIPTION_OPEN_PLAYERS_SESSIONS("Open players sessions inventory"),
-    DESCRIPTION_OPEN_PLAYER_SESSIONS("Open a player sessions inventory"),
 
     SESSION_NOT_FOUND("&cImpossible to find the session &f%id%&c."),
     CLEAN("&aThe database has been cleaned."),

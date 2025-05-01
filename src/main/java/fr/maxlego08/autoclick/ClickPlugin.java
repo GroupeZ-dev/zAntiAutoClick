@@ -9,6 +9,7 @@ import fr.maxlego08.autoclick.buttons.SessionButton;
 import fr.maxlego08.autoclick.buttons.VerifiedInvalidSessionButton;
 import fr.maxlego08.autoclick.command.CommandManager;
 import fr.maxlego08.autoclick.command.commands.CommandAntiAutoClick;
+import fr.maxlego08.autoclick.messages.MessageLoader;
 import fr.maxlego08.autoclick.storage.StorageManager;
 import fr.maxlego08.autoclick.zcore.ZPlugin;
 import fr.maxlego08.autoclick.zcore.utils.Config;
@@ -26,6 +27,7 @@ public final class ClickPlugin extends ZPlugin {
     private final StorageManager storageManager = new StorageManager(this);
     private final SessionManager sessionManager = new SessionManager(this);
     private final CommandManager commandManager = new CommandManager(this);
+    private final MessageLoader messageLoader = new MessageLoader(this);
 
     private InventoryManager inventoryManager;
     private ButtonManager buttonManager;
@@ -45,6 +47,7 @@ public final class ClickPlugin extends ZPlugin {
         this.buttonManager = getProvider(ButtonManager.class);
 
         Config.load(getConfig(), this);
+        this.messageLoader.load();
 
         PacketEvents.getAPI().init();
         PacketEvents.getAPI().getEventManager().registerListener(new ClickListener(this), PacketListenerPriority.LOW);
@@ -82,6 +85,7 @@ public final class ClickPlugin extends ZPlugin {
     public void reloadFiles() {
         this.reloadConfig();
         Config.load(getConfig(), this);
+        this.messageLoader.load();
         this.loadInventories();
     }
 

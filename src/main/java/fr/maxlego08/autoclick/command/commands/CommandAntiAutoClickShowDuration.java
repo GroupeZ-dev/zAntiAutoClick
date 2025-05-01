@@ -12,7 +12,7 @@ public class CommandAntiAutoClickShowDuration extends VCommand {
 
     public CommandAntiAutoClickShowDuration(ClickPlugin plugin) {
         super(plugin);
-        this.setPermission(Permission.ZANTIAUTOCLICK_SHOW);
+        this.setPermission(Permission.ZANTIAUTOCLICK_SHOW_DURATION);
         this.addSubCommand("show-duration");
         this.setDescription(Message.DESCRIPTION_SHOW);
         this.addRequireArg("seconds", (a, b) -> List.of("60", "120", "180", "240", "300"));
