@@ -1,5 +1,5 @@
 name: zAntiAutoClick
-version: '1.0.0'
+version: '1.0.1'
 main: fr.maxlego08.autoclick.ClickPlugin
 api-version: '1.20'
 authors: [ Maxlego08 ]
