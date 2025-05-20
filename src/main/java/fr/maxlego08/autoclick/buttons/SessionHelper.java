@@ -2,8 +2,8 @@ package fr.maxlego08.autoclick.buttons;
 
 import fr.maxlego08.autoclick.SessionManager;
 import fr.maxlego08.autoclick.api.ClickSession;
+import fr.maxlego08.menu.api.button.PaginateButton;
 import fr.maxlego08.menu.api.utils.Placeholders;
-import fr.maxlego08.menu.button.ZButton;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.UUID;
 
-public abstract class SessionHelper extends ZButton {
+public abstract class SessionHelper extends PaginateButton {
 
     protected ItemStack createItemStack(Player player, ClickSession session, SessionManager sessionManager) {
 

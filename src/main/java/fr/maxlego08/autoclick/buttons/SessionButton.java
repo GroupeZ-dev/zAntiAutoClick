@@ -1,29 +1,21 @@
 package fr.maxlego08.autoclick.buttons;
 
-import fr.maxlego08.autoclick.ClickPlugin;
 import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.zcore.utils.Config;
-import fr.maxlego08.menu.api.button.PaginateButton;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
 import fr.maxlego08.menu.api.utils.Placeholders;
-import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SessionButton extends SessionHelper implements PaginateButton {
+public class SessionButton extends SessionHelper {
 
-    private final ClickPlugin plugin;
     private final int CLICKS_PER_ITEM = 20;
 
-    public SessionButton(Plugin plugin) {
-        this.plugin = (ClickPlugin) plugin;
-    }
-
     @Override
-    public void onInventoryOpen(Player player, InventoryDefault inventory, Placeholders placeholders) {
+    public void onInventoryOpen(Player player, InventoryEngine inventory, Placeholders placeholders) {
         super.onInventoryOpen(player, inventory, placeholders);
 
         if (!player.hasMetadata("zaac-session")) return;
@@ -38,7 +30,7 @@ public class SessionButton extends SessionHelper implements PaginateButton {
     }
 
     @Override
-    public boolean checkPermission(Player player, InventoryDefault inventory, Placeholders placeholders) {
+    public boolean checkPermission(Player player, InventoryEngine inventory, Placeholders placeholders) {
         return getPaginationSize(player) > 0;
     }
 
@@ -53,7 +45,7 @@ public class SessionButton extends SessionHelper implements PaginateButton {
     }
 
     @Override
-    public void onRender(Player player, InventoryDefault inventory) {
+    public void onRender(Player player, InventoryEngine inventory) {
 
         if (!player.hasMetadata("zaac-session")) return;
         if (!(player.getMetadata("zaac-session").getFirst().value() instanceof ClickSession session)) return;

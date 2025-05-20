@@ -4,9 +4,8 @@ import fr.maxlego08.autoclick.ClickPlugin;
 import fr.maxlego08.autoclick.SessionManager;
 import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.zcore.utils.Config;
-import fr.maxlego08.menu.api.button.PaginateButton;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
 import fr.maxlego08.menu.api.utils.Placeholders;
-import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -15,7 +14,7 @@ import org.bukkit.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class VerifiedInvalidSessionButton extends SessionHelper implements PaginateButton {
+public class VerifiedInvalidSessionButton extends SessionHelper {
 
     private final ClickPlugin plugin;
 
@@ -29,7 +28,7 @@ public class VerifiedInvalidSessionButton extends SessionHelper implements Pagin
     }
 
     @Override
-    public boolean checkPermission(Player player, InventoryDefault inventory, Placeholders placeholders) {
+    public boolean checkPermission(Player player, InventoryEngine inventory, Placeholders placeholders) {
         return getPaginationSize(player) > 0;
     }
 
@@ -44,7 +43,7 @@ public class VerifiedInvalidSessionButton extends SessionHelper implements Pagin
     }
 
     @Override
-    public void onRender(Player player, InventoryDefault inventory) {
+    public void onRender(Player player, InventoryEngine inventory) {
 
         if (!player.hasMetadata("zaac-verified-invalid-sessions")) return;
         if (!(player.getMetadata("zaac-verified-invalid-sessions").getFirst().value() instanceof List<?> list)) return;
