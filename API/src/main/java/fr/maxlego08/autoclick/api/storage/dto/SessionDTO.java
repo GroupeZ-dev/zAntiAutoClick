@@ -1,14 +1,15 @@
 package fr.maxlego08.autoclick.api.storage.dto;
 
-import fr.maxlego08.autoclick.zcore.utils.Config;
 import fr.maxlego08.autoclick.api.ClickSession;
+import fr.maxlego08.autoclick.api.utils.Config;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public record SessionDTO(int id, UUID unique_id, String differences, Date started_at, Date finished_at) implements ClickSession {
+public record SessionDTO(int id, UUID unique_id, String differences, Date started_at,
+                         Date finished_at) implements ClickSession {
 
     @Override
     public List<Integer> getDifferences() {

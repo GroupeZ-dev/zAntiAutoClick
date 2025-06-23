@@ -2,6 +2,7 @@ package fr.maxlego08.autoclick;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import fr.maxlego08.autoclick.api.ClickPlugin;
 import fr.maxlego08.autoclick.buttons.InvalidSessionButton;
 import fr.maxlego08.autoclick.buttons.PlayerButton;
 import fr.maxlego08.autoclick.buttons.PlayersButton;
@@ -12,17 +13,17 @@ import fr.maxlego08.autoclick.command.commands.CommandAntiAutoClick;
 import fr.maxlego08.autoclick.messages.MessageLoader;
 import fr.maxlego08.autoclick.storage.StorageManager;
 import fr.maxlego08.autoclick.zcore.ZPlugin;
-import fr.maxlego08.autoclick.zcore.utils.Config;
+import fr.maxlego08.autoclick.api.utils.Config;
 import fr.maxlego08.autoclick.zcore.utils.plugins.Metrics;
 import fr.maxlego08.menu.api.ButtonManager;
 import fr.maxlego08.menu.api.InventoryManager;
-import fr.maxlego08.menu.button.loader.NoneLoader;
-import fr.maxlego08.menu.exceptions.InventoryException;
+import fr.maxlego08.menu.api.exceptions.InventoryException;
+import fr.maxlego08.menu.api.loader.NoneLoader;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 
 import java.util.List;
 
-public final class ClickPlugin extends ZPlugin {
+public final class ZClickPlugin extends ZPlugin implements ClickPlugin {
 
     private final StorageManager storageManager = new StorageManager(this);
     private final SessionManager sessionManager = new SessionManager(this);
@@ -89,10 +90,12 @@ public final class ClickPlugin extends ZPlugin {
         this.loadInventories();
     }
 
+    @Override
     public InventoryManager getInventoryManager() {
         return inventoryManager;
     }
 
+    @Override
     public ButtonManager getButtonManager() {
         return buttonManager;
     }

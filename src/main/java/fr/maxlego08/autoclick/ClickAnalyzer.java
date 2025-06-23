@@ -1,7 +1,7 @@
 package fr.maxlego08.autoclick;
 
 import fr.maxlego08.autoclick.api.result.AnalyzeResult;
-import fr.maxlego08.autoclick.zcore.utils.Config;
+import fr.maxlego08.autoclick.api.utils.Config;
 
 import java.util.ArrayList;
 import java.util.Collections;

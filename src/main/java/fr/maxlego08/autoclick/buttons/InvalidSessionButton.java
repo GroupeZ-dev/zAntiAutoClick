@@ -1,10 +1,9 @@
 package fr.maxlego08.autoclick.buttons;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.api.ClickSession;
-import fr.maxlego08.menu.api.button.PaginateButton;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
 import fr.maxlego08.menu.api.utils.Placeholders;
-import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
@@ -12,12 +11,12 @@ import org.bukkit.plugin.Plugin;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class InvalidSessionButton extends SessionHelper implements PaginateButton {
+public class InvalidSessionButton extends SessionHelper {
 
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
 
     public InvalidSessionButton(Plugin plugin) {
-        this.plugin = (ClickPlugin) plugin;
+        this.plugin = (ZClickPlugin) plugin;
     }
 
     @Override
@@ -26,7 +25,7 @@ public class InvalidSessionButton extends SessionHelper implements PaginateButto
     }
 
     @Override
-    public boolean checkPermission(Player player, InventoryDefault inventory, Placeholders placeholders) {
+    public boolean checkPermission(Player player, InventoryEngine inventory, Placeholders placeholders) {
         return getPaginationSize(player) > 0;
     }
 
@@ -41,7 +40,7 @@ public class InvalidSessionButton extends SessionHelper implements PaginateButto
     }
 
     @Override
-    public void onRender(Player player, InventoryDefault inventory) {
+    public void onRender(Player player, InventoryEngine inventory) {
 
         if (!player.hasMetadata("zaac-invalid-sessions")) return;
         if (!(player.getMetadata("zaac-invalid-sessions").getFirst().value() instanceof List<?> list)) return;

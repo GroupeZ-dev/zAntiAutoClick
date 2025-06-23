@@ -4,7 +4,7 @@ import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.api.result.SessionResult;
 import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.zcore.enums.Message;
-import fr.maxlego08.autoclick.zcore.utils.Config;
+import fr.maxlego08.autoclick.api.utils.Config;
 import fr.maxlego08.autoclick.zcore.utils.ZUtils;
 import fr.maxlego08.menu.api.requirement.Action;
 import fr.maxlego08.menu.api.utils.Placeholders;
@@ -26,10 +26,10 @@ import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager extends ZUtils implements Listener {
 
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
     private final ConcurrentMap<UUID, Session> sessions = new ConcurrentHashMap<>();
 
-    public SessionManager(ClickPlugin plugin) {
+    public SessionManager(ZClickPlugin plugin) {
         this.plugin = plugin;
     }
 

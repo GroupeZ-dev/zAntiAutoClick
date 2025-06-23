@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -69,7 +69,7 @@ public class Metrics {
     }
 
     // The plugin
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
     // The plugin id
     private final int pluginId;
     // A list with all custom charts
@@ -85,7 +85,7 @@ public class Metrics {
      *                 It can be found at <a href="https://bstats.org/what-is-my-plugin-id">What is my plugin id?</a>
      */
     @SuppressWarnings("deprecation")
-    public Metrics(ClickPlugin plugin, int pluginId) {
+    public Metrics(ZClickPlugin plugin, int pluginId) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null!");
         }
