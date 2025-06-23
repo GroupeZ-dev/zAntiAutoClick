@@ -7,9 +7,9 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientIn
 
 public class ClickListener implements PacketListener {
 
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
 
-    public ClickListener(ClickPlugin plugin) {
+    public ClickListener(ZClickPlugin plugin) {
         this.plugin = plugin;
     }
 

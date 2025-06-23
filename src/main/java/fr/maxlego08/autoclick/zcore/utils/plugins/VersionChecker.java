@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.zcore.utils.plugins;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.zcore.utils.ZUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -23,7 +23,7 @@ public class VersionChecker extends ZUtils implements Listener {
 
     private final String URL_API = "https://groupez.dev/api/v1/resource/version/%s";
     private final String URL_RESOURCE = "https://groupez.dev/resources/%s";
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
     private final int pluginID;
     private boolean useLastVersion = false;
 
@@ -33,7 +33,7 @@ public class VersionChecker extends ZUtils implements Listener {
      * @param plugin
      * @param pluginID
      */
-    public VersionChecker(ClickPlugin plugin, int pluginID) {
+    public VersionChecker(ZClickPlugin plugin, int pluginID) {
         super();
         this.plugin = plugin;
         this.pluginID = pluginID;

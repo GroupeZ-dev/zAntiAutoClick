@@ -11,6 +11,7 @@ rootProject.extra.properties["sha"]?.let { sha ->
 tasks {
     shadowJar {
 
+        relocate("fr.maxlego08.sarah", "fr.maxlego08.autoclick.libs")
 
         destinationDirectory.set(rootProject.extra["apiFolder"] as File)
     }

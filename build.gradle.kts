@@ -5,7 +5,7 @@ plugins {
     id("com.gradleup.shadow") version "9.0.0-beta11"
 }
 
-group = "fr.maxlego08.antiautoclick"
+group = "fr.maxlego08.autoclick"
 version = "1.0.2"
 
 extra.set("targetFolder", file("target/"))

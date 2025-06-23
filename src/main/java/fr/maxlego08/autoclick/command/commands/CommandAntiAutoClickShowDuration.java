@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.command.commands;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.command.VCommand;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.enums.Permission;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class CommandAntiAutoClickShowDuration extends VCommand {
 
-    public CommandAntiAutoClickShowDuration(ClickPlugin plugin) {
+    public CommandAntiAutoClickShowDuration(ZClickPlugin plugin) {
         super(plugin);
         this.setPermission(Permission.ZANTIAUTOCLICK_SHOW_DURATION);
         this.addSubCommand("show-duration");
@@ -19,7 +19,7 @@ public class CommandAntiAutoClickShowDuration extends VCommand {
     }
 
     @Override
-    protected CommandType perform(ClickPlugin plugin) {
+    protected CommandType perform(ZClickPlugin plugin) {
 
         int seconds = this.argAsInteger(0);
         plugin.getSessionManager().sendSuspect(sender, seconds, true);

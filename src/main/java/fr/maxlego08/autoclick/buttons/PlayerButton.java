@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.buttons;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.zcore.utils.PlayerInfo;
 import fr.maxlego08.menu.api.engine.InventoryEngine;
 import fr.maxlego08.menu.api.utils.Placeholders;
@@ -11,10 +11,10 @@ import org.bukkit.plugin.Plugin;
 
 public class PlayerButton extends SessionHelper {
 
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
 
     public PlayerButton(Plugin plugin) {
-        this.plugin = (ClickPlugin) plugin;
+        this.plugin = (ZClickPlugin) plugin;
     }
 
     @Override

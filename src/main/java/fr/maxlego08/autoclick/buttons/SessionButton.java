@@ -1,7 +1,7 @@
 package fr.maxlego08.autoclick.buttons;
 
 import fr.maxlego08.autoclick.api.ClickSession;
-import fr.maxlego08.autoclick.zcore.utils.Config;
+import fr.maxlego08.autoclick.api.utils.Config;
 import fr.maxlego08.menu.api.engine.InventoryEngine;
 import fr.maxlego08.menu.api.utils.Placeholders;
 import org.bukkit.entity.Player;

@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.command.commands;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.command.VCommand;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.enums.Permission;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class CommandAntiAutoClickSuspect extends VCommand {
 
-    public CommandAntiAutoClickSuspect(ClickPlugin plugin) {
+    public CommandAntiAutoClickSuspect(ZClickPlugin plugin) {
         super(plugin);
         this.setPermission(Permission.ZANTIAUTOCLICK_SUSPECT);
         this.addSubCommand("suspect");
@@ -19,7 +19,7 @@ public class CommandAntiAutoClickSuspect extends VCommand {
     }
 
     @Override
-    protected CommandType perform(ClickPlugin plugin) {
+    protected CommandType perform(ZClickPlugin plugin) {
 
         int seconds = this.argAsInteger(0);
         plugin.getSessionManager().sendSuspect(sender, seconds, false);

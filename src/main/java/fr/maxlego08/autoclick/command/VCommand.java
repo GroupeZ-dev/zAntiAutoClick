@@ -1,7 +1,7 @@
 package fr.maxlego08.autoclick.command;
 
-import fr.maxlego08.autoclick.ClickPlugin;
-import fr.maxlego08.autoclick.zcore.utils.Config;
+import fr.maxlego08.autoclick.ZClickPlugin;
+import fr.maxlego08.autoclick.api.utils.Config;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.enums.Permission;
 import fr.maxlego08.autoclick.zcore.utils.commands.Arguments;
@@ -24,7 +24,7 @@ import java.util.Optional;
  */
 public abstract class VCommand extends Arguments {
 
-    protected final ClickPlugin plugin;
+    protected final ZClickPlugin plugin;
     /**
      * List of sub-commands for this command.
      */
@@ -68,7 +68,7 @@ public abstract class VCommand extends Arguments {
      *
      * @param plugin the plugin instance.
      */
-    public VCommand(ClickPlugin plugin) {
+    public VCommand(ZClickPlugin plugin) {
         super();
         this.plugin = plugin;
     }
@@ -486,7 +486,7 @@ public abstract class VCommand extends Arguments {
      * @param args          the arguments of the command.
      * @return the command type.
      */
-    public CommandType prePerform(ClickPlugin plugin, CommandSender commandSender, String[] args) {
+    public CommandType prePerform(ZClickPlugin plugin, CommandSender commandSender, String[] args) {
 
         // Update the number of arguments according to the number of parents
         this.parentCount = this.parentCount(0);
@@ -531,7 +531,7 @@ public abstract class VCommand extends Arguments {
      * @param plugin the plugin instance.
      * @return the command type.
      */
-    protected abstract CommandType perform(ClickPlugin plugin);
+    protected abstract CommandType perform(ZClickPlugin plugin);
 
     /**
      * Checks if there are any sub-commands with the same name as this command.
@@ -566,7 +566,7 @@ public abstract class VCommand extends Arguments {
      * @param args   the arguments of the command.
      * @return the list of tab completions.
      */
-    public List<String> toTab(ClickPlugin plugin, CommandSender sender, String[] args) {
+    public List<String> toTab(ZClickPlugin plugin, CommandSender sender, String[] args) {
 
         this.parentCount = this.parentCount(0);
 

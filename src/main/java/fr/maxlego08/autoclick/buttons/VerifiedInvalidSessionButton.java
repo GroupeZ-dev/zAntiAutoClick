@@ -1,9 +1,9 @@
 package fr.maxlego08.autoclick.buttons;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.SessionManager;
 import fr.maxlego08.autoclick.api.ClickSession;
-import fr.maxlego08.autoclick.zcore.utils.Config;
+import fr.maxlego08.autoclick.api.utils.Config;
 import fr.maxlego08.menu.api.engine.InventoryEngine;
 import fr.maxlego08.menu.api.utils.Placeholders;
 import org.bukkit.Bukkit;
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 public class VerifiedInvalidSessionButton extends SessionHelper {
 
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
 
     public VerifiedInvalidSessionButton(Plugin plugin) {
-        this.plugin = (ClickPlugin) plugin;
+        this.plugin = (ZClickPlugin) plugin;
     }
 
     @Override
