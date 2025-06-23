@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.storage;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.Session;
 import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.api.result.AnalyzeResult;
@@ -36,10 +36,10 @@ import java.util.stream.Collectors;
 
 public class StorageManager {
 
-    private final ClickPlugin plugin;
+    private final ZClickPlugin plugin;
     private RequestHelper requestHelper;
 
-    public StorageManager(ClickPlugin plugin) {
+    public StorageManager(ZClickPlugin plugin) {
         this.plugin = plugin;
     }
 

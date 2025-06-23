@@ -1,6 +1,6 @@
-package fr.maxlego08.autoclick.zcore.utils;
+package fr.maxlego08.autoclick.api.utils;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.api.ClickPlugin;
 import fr.maxlego08.menu.api.requirement.Action;
 import org.bukkit.configuration.file.FileConfiguration;
 

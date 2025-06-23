@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.command.commands;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.command.VCommand;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.enums.Permission;
@@ -8,7 +8,7 @@ import fr.maxlego08.autoclick.zcore.utils.commands.CommandType;
 
 public class CommandAntiAutoClickShow extends VCommand {
 
-    public CommandAntiAutoClickShow(ClickPlugin plugin) {
+    public CommandAntiAutoClickShow(ZClickPlugin plugin) {
         super(plugin);
         this.setPermission(Permission.ZANTIAUTOCLICK_SHOW);
         this.addSubCommand("show");
@@ -17,7 +17,7 @@ public class CommandAntiAutoClickShow extends VCommand {
     }
 
     @Override
-    protected CommandType perform(ClickPlugin plugin) {
+    protected CommandType perform(ZClickPlugin plugin) {
 
         int id = this.argAsInteger(0);
         plugin.getStorageManager().select(id, session -> {

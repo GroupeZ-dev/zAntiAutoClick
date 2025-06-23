@@ -1,6 +1,6 @@
 package fr.maxlego08.autoclick.command.commands;
 
-import fr.maxlego08.autoclick.ClickPlugin;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.command.VCommand;
 import fr.maxlego08.autoclick.zcore.enums.Message;
 import fr.maxlego08.autoclick.zcore.enums.Permission;
@@ -9,7 +9,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 public class CommandAntiAutoClickVerifiedInvalidSessions extends VCommand {
 
-    public CommandAntiAutoClickVerifiedInvalidSessions(ClickPlugin plugin) {
+    public CommandAntiAutoClickVerifiedInvalidSessions(ZClickPlugin plugin) {
         super(plugin);
         this.setPermission(Permission.ZANTIAUTOCLICK_OPEN_VERIFIED_INVALID_SESSIONS);
         this.onlyPlayers();
@@ -18,7 +18,7 @@ public class CommandAntiAutoClickVerifiedInvalidSessions extends VCommand {
     }
 
     @Override
-    protected CommandType perform(ClickPlugin plugin) {
+    protected CommandType perform(ZClickPlugin plugin) {
         plugin.getStorageManager().getVerifiedInvalidSessions(sessions -> {
             this.player.setMetadata("zaac-verified-invalid-sessions", new FixedMetadataValue(plugin, sessions));
             plugin.getServer().getScheduler().runTask(plugin, () -> plugin.getInventoryManager().openInventory(this.player, plugin, "verified-invalid-sessions"));
