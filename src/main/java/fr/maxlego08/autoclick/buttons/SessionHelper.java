@@ -29,7 +29,7 @@ public abstract class SessionHelper extends PaginateButton {
     protected ItemStack updateSkull(ItemStack itemStack, UUID uuid) {
         var meta = itemStack.getItemMeta();
         if (meta instanceof SkullMeta skullMeta) {
-            skullMeta.setPlayerProfile(Bukkit.getOfflinePlayer(uuid).getPlayerProfile());
+            skullMeta.setOwningPlayer(Bukkit.getOfflinePlayer(uuid));
             itemStack.setItemMeta(skullMeta);
         }
         return itemStack;
