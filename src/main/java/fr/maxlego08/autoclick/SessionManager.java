@@ -60,9 +60,23 @@ public class SessionManager extends ZUtils implements Listener {
 
     private void endSession(UUID uuid, Session session) {
 
+        // Suppression atomique - empêche le double traitement
+        // Si la session dans la map n'est pas celle qu'on essaie de terminer, on ne fait rien
+        Session removedSession = sessions.remove(uuid);
+        if (removedSession == null || removedSession != session) {
+            // Session déjà traitée par un autre thread ou remplacée par une nouvelle session
+            return;
+        }
+
+        // Annuler la tâche programmée si elle existe
+        var task = session.getTask();
+        if (task != null) {
+            task.cancel();
+            session.setTask(null);
+        }
+
         var player = Bukkit.getPlayer(uuid);
         session.setFinishedAt(System.currentTimeMillis());
-        sessions.remove(uuid);
 
         var storage = this.plugin.getStorageManager();
 
@@ -95,11 +109,6 @@ public class SessionManager extends ZUtils implements Listener {
                 });
             });
         }
-
-        var task = session.getTask();
-        if (task != null) task.cancel();
-        session.setTask(null);
-
     }
 
     /**
@@ -137,8 +146,9 @@ public class SessionManager extends ZUtils implements Listener {
     public void onQuit(PlayerQuitEvent event) {
 
         var uuid = event.getPlayer().getUniqueId();
-        if (sessions.containsKey(uuid)) {
-            this.endSession(uuid, sessions.get(uuid));
+        Session session = sessions.get(uuid);
+        if (session != null) {
+            this.endSession(uuid, session);
         }
     }
 
