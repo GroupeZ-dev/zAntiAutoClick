@@ -147,9 +147,15 @@ public class StorageManager {
      * <p>
      * This method returns a list of all sessions in the database.
      * </p>
+     * <p>
+     * <b>Warning:</b> This method blocks the calling thread. Use {@link #select(Consumer)}
+     * for asynchronous operations to avoid blocking the main server thread.
+     * </p>
      *
      * @return A list of all sessions in the database.
+     * @deprecated Use {@link #select(Consumer)} for non-blocking operations
      */
+    @Deprecated
     public List<SessionDTO> select() {
         return this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
     }
@@ -163,7 +169,8 @@ public class StorageManager {
      */
     public void clean() {
         this.async(() -> {
-            for (SessionDTO value : select()) {
+            var sessions = this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
+            for (SessionDTO value : sessions) {
                 if (!value.isValid()) {
                     this.requestHelper.delete(Tables.SESSIONS, table -> table.where("id", value.id()));
                 }

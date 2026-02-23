@@ -8,6 +8,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Data Transfer Object representing a session stored in the database.
+ * <p>
+ * <b>Note:</b> This is a raw persistence record. Methods like {@link #getCheatPercent()},
+ * {@link #getAverage()}, {@link #getMedian()}, and {@link #getStandardDivision()} return
+ * default values (0). For computed statistics, use the {@code Session} class which combines
+ * this DTO with {@code InvalidSessionDTO} data.
+ * </p>
+ */
 public record SessionDTO(int id, UUID unique_id, String differences, Date started_at,
                          Date finished_at) implements ClickSession {
 
