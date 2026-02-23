@@ -117,6 +117,8 @@ public final class ZClickPlugin extends ZPlugin implements ClickPlugin {
             this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/verified-invalid-sessions.yml");
             this.inventoryManager.loadInventoryOrSaveResource(this, "inventories/info-session.yml");
         } catch (InventoryException exception) {
+            getLogger().severe("Erreur lors du chargement des inventaires: " + exception.getMessage());
+            getLogger().severe("Vérifiez vos fichiers YAML dans le dossier inventories/");
             exception.printStackTrace();
         }
     }
