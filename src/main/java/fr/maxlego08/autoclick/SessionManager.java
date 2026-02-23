@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -26,11 +27,41 @@ import java.util.concurrent.ConcurrentMap;
 
 public class SessionManager extends ZUtils implements Listener {
 
+    private static final long CLEANUP_INTERVAL_TICKS = 20L * 60; // 1 minute
+    private static final long SESSION_TIMEOUT_MS = 30000; // 30 secondes sans activité
+
     private final ZClickPlugin plugin;
     private final ConcurrentMap<UUID, Session> sessions = new ConcurrentHashMap<>();
 
     public SessionManager(ZClickPlugin plugin) {
         this.plugin = plugin;
+        this.startCleanupTask();
+    }
+
+    /**
+     * Démarre une tâche périodique pour nettoyer les sessions abandonnées.
+     * Cela évite les fuites mémoire si une session n'est jamais terminée correctement.
+     */
+    private void startCleanupTask() {
+        this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
+            long now = System.currentTimeMillis();
+
+            sessions.entrySet().removeIf(entry -> {
+                Session session = entry.getValue();
+                long lastActivity = session.getLastClickAt();
+
+                // Si aucune activité depuis SESSION_TIMEOUT_MS, nettoyer la session
+                if (lastActivity != 0 && (now - lastActivity) > SESSION_TIMEOUT_MS) {
+                    BukkitTask task = session.getTask();
+                    if (task != null) {
+                        task.cancel();
+                    }
+                    this.plugin.getLogger().warning("Session orpheline nettoyée pour " + entry.getKey());
+                    return true;
+                }
+                return false;
+            });
+        }, CLEANUP_INTERVAL_TICKS, CLEANUP_INTERVAL_TICKS);
     }
 
     public void onClick(UUID uuid) {
@@ -60,9 +91,23 @@ public class SessionManager extends ZUtils implements Listener {
 
     private void endSession(UUID uuid, Session session) {
 
+        // Suppression atomique - empêche le double traitement
+        // Si la session dans la map n'est pas celle qu'on essaie de terminer, on ne fait rien
+        Session removedSession = sessions.remove(uuid);
+        if (removedSession == null || removedSession != session) {
+            // Session déjà traitée par un autre thread ou remplacée par une nouvelle session
+            return;
+        }
+
+        // Annuler la tâche programmée si elle existe
+        var task = session.getTask();
+        if (task != null) {
+            task.cancel();
+            session.setTask(null);
+        }
+
         var player = Bukkit.getPlayer(uuid);
         session.setFinishedAt(System.currentTimeMillis());
-        sessions.remove(uuid);
 
         var storage = this.plugin.getStorageManager();
 
@@ -83,19 +128,18 @@ public class SessionManager extends ZUtils implements Listener {
                         this.plugin.getLogger().info("La session de " + uuid + " (id: " + session.getId() + ") est considéré comme une session d'auto-click.");
                         storage.insertInvalidSession(session, sessionResult, analyzeResult, invalidSession -> {
                             session.setInvalidSession(invalidSession);
-                            this.sendActions(Config.endCheatSessionActions, player, session);
+                            if (player != null && player.isOnline()) {
+                                this.sendActions(Config.endCheatSessionActions, player, session);
+                            }
                         });
                     } else {
-                        this.sendActions(Config.endSessionActions, player, session);
+                        if (player != null && player.isOnline()) {
+                            this.sendActions(Config.endSessionActions, player, session);
+                        }
                     }
                 });
             });
         }
-
-        var task = session.getTask();
-        if (task != null) task.cancel();
-        session.setTask(null);
-
     }
 
     /**
@@ -133,8 +177,9 @@ public class SessionManager extends ZUtils implements Listener {
     public void onQuit(PlayerQuitEvent event) {
 
         var uuid = event.getPlayer().getUniqueId();
-        if (sessions.containsKey(uuid)) {
-            this.endSession(uuid, sessions.get(uuid));
+        Session session = sessions.get(uuid);
+        if (session != null) {
+            this.endSession(uuid, session);
         }
     }
 

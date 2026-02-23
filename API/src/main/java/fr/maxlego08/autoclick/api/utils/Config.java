@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class Config {
 
@@ -95,6 +96,151 @@ public class Config {
 
         simpleDateFormat = new SimpleDateFormat(configuration.getString("date-format", "dd/MM/yyyy HH:mm:ss"));
         clickLoreLine = configuration.getString("click-lore-line", "&f%click%ms");
+
+        validateConfig(plugin.getLogger());
+    }
+
+    private static void validateConfig(Logger logger) {
+        boolean hasErrors = false;
+
+        // Session validation
+        if (minimumDelay < 0) {
+            logger.warning("session.minimum-delay doit être >= 0, valeur actuelle: " + minimumDelay + ". Réinitialisé à 500.");
+            minimumDelay = 500;
+            hasErrors = true;
+        }
+
+        if (sessionEndAfter <= 0) {
+            logger.warning("session.end-after doit être > 0, valeur actuelle: " + sessionEndAfter + ". Réinitialisé à 50.");
+            sessionEndAfter = 50;
+            hasErrors = true;
+        }
+
+        if (minimumSessionDuration < 0) {
+            logger.warning("session.minimum-duration doit être >= 0, valeur actuelle: " + minimumSessionDuration + ". Réinitialisé à 60000.");
+            minimumSessionDuration = 60000;
+            hasErrors = true;
+        }
+
+        if (minimumSessionClicks < 1) {
+            logger.warning("session.minimum-clicks doit être >= 1, valeur actuelle: " + minimumSessionClicks + ". Réinitialisé à 40.");
+            minimumSessionClicks = 40;
+            hasErrors = true;
+        }
+
+        // Analyze validation
+        if (sessionTrimmed < 0 || sessionTrimmed > 0.4) {
+            logger.warning("analyze.session-trimmed doit être entre 0 et 0.4, valeur actuelle: " + sessionTrimmed + ". Réinitialisé à 0.05.");
+            sessionTrimmed = 0.05;
+            hasErrors = true;
+        }
+
+        if (standardDeviation < 0) {
+            logger.warning("analyze.standard-deviation doit être >= 0, valeur actuelle: " + standardDeviation + ". Réinitialisé à 20.0.");
+            standardDeviation = 20.0;
+            hasErrors = true;
+        }
+
+        if (smallVariation <= 0) {
+            logger.warning("analyze.small-variation doit être > 0, valeur actuelle: " + smallVariation + ". Réinitialisé à 10.");
+            smallVariation = 10;
+            hasErrors = true;
+        }
+
+        if (largeVariation <= smallVariation) {
+            logger.warning("analyze.large-variation doit être > small-variation (" + smallVariation + "), valeur actuelle: " + largeVariation + ". Réinitialisé à 150.");
+            largeVariation = 150;
+            hasErrors = true;
+        }
+
+        if (maxScore <= 0) {
+            logger.warning("analyze.max-score doit être > 0, valeur actuelle: " + maxScore + ". Réinitialisé à 100.0.");
+            maxScore = 100.0;
+            hasErrors = true;
+        }
+
+        if (score < 0 || score > maxScore) {
+            logger.warning("analyze.score doit être entre 0 et " + maxScore + ", valeur actuelle: " + score + ". Réinitialisé à 60.0.");
+            score = 60.0;
+            hasErrors = true;
+        }
+
+        // Scoring validation
+        if (smallVariationThresholdPercent < 0 || smallVariationThresholdPercent > 100) {
+            logger.warning("analyze.scoring.small-variation.threshold-percent doit être entre 0 et 100, valeur actuelle: " + smallVariationThresholdPercent + ". Réinitialisé à 50.0.");
+            smallVariationThresholdPercent = 50.0;
+            hasErrors = true;
+        }
+
+        if (smallVariationMultiplier < 0) {
+            logger.warning("analyze.scoring.small-variation.multiplier doit être >= 0, valeur actuelle: " + smallVariationMultiplier + ". Réinitialisé à 0.5.");
+            smallVariationMultiplier = 0.5;
+            hasErrors = true;
+        }
+
+        if (smallVariationMaxBonus < 0) {
+            logger.warning("analyze.scoring.small-variation.max-bonus doit être >= 0, valeur actuelle: " + smallVariationMaxBonus + ". Réinitialisé à 25.0.");
+            smallVariationMaxBonus = 25.0;
+            hasErrors = true;
+        }
+
+        if (rangeRelativeThreshold < 0) {
+            logger.warning("analyze.scoring.range.relative-threshold doit être >= 0, valeur actuelle: " + rangeRelativeThreshold + ". Réinitialisé à 0.3.");
+            rangeRelativeThreshold = 0.3;
+            hasErrors = true;
+        }
+
+        if (rangeMaxBonus < 0) {
+            logger.warning("analyze.scoring.range.max-bonus doit être >= 0, valeur actuelle: " + rangeMaxBonus + ". Réinitialisé à 25.0.");
+            rangeMaxBonus = 25.0;
+            hasErrors = true;
+        }
+
+        if (stddevRelativeThreshold < 0) {
+            logger.warning("analyze.scoring.stddev.relative-threshold doit être >= 0, valeur actuelle: " + stddevRelativeThreshold + ". Réinitialisé à 0.1.");
+            stddevRelativeThreshold = 0.1;
+            hasErrors = true;
+        }
+
+        if (stddevMaxBonus < 0) {
+            logger.warning("analyze.scoring.stddev.max-bonus doit être >= 0, valeur actuelle: " + stddevMaxBonus + ". Réinitialisé à 20.0.");
+            stddevMaxBonus = 20.0;
+            hasErrors = true;
+        }
+
+        if (top1FrequencyThresholdPercent < 0 || top1FrequencyThresholdPercent > 100) {
+            logger.warning("analyze.scoring.top1-frequency.threshold-percent doit être entre 0 et 100, valeur actuelle: " + top1FrequencyThresholdPercent + ". Réinitialisé à 10.0.");
+            top1FrequencyThresholdPercent = 10.0;
+            hasErrors = true;
+        }
+
+        if (top1FrequencyMultiplier < 0) {
+            logger.warning("analyze.scoring.top1-frequency.multiplier doit être >= 0, valeur actuelle: " + top1FrequencyMultiplier + ". Réinitialisé à 0.5.");
+            top1FrequencyMultiplier = 0.5;
+            hasErrors = true;
+        }
+
+        if (top3FrequencyThresholdPercent < 0 || top3FrequencyThresholdPercent > 100) {
+            logger.warning("analyze.scoring.top3-frequency.threshold-percent doit être entre 0 et 100, valeur actuelle: " + top3FrequencyThresholdPercent + ". Réinitialisé à 30.0.");
+            top3FrequencyThresholdPercent = 30.0;
+            hasErrors = true;
+        }
+
+        if (top3FrequencyMultiplier < 0) {
+            logger.warning("analyze.scoring.top3-frequency.multiplier doit être >= 0, valeur actuelle: " + top3FrequencyMultiplier + ". Réinitialisé à 0.3.");
+            top3FrequencyMultiplier = 0.3;
+            hasErrors = true;
+        }
+
+        if (noLargeJumpBonus < 0) {
+            logger.warning("analyze.scoring.no-large-jump-bonus doit être >= 0, valeur actuelle: " + noLargeJumpBonus + ". Réinitialisé à 15.0.");
+            noLargeJumpBonus = 15.0;
+            hasErrors = true;
+        }
+
+        if (hasErrors) {
+            logger.warning("Des valeurs de configuration invalides ont été corrigées automatiquement.");
+        }
     }
 }
 

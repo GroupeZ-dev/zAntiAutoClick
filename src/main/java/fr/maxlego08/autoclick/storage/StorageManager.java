@@ -1,7 +1,7 @@
 package fr.maxlego08.autoclick.storage;
 
-import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.Session;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.api.result.AnalyzeResult;
 import fr.maxlego08.autoclick.api.result.SessionResult;
@@ -12,26 +12,16 @@ import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.migrations.InvalidSessionMigration;
 import fr.maxlego08.autoclick.migrations.SessionMigration;
 import fr.maxlego08.autoclick.zcore.utils.PlayerInfo;
-import fr.maxlego08.sarah.DatabaseConfiguration;
-import fr.maxlego08.sarah.DatabaseConnection;
-import fr.maxlego08.sarah.HikariDatabaseConnection;
-import fr.maxlego08.sarah.MigrationManager;
-import fr.maxlego08.sarah.RequestHelper;
-import fr.maxlego08.sarah.SqliteConnection;
+import fr.maxlego08.sarah.*;
 import fr.maxlego08.sarah.database.DatabaseType;
 import fr.maxlego08.sarah.logger.JULogger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class StorageManager {
@@ -48,29 +38,30 @@ public class StorageManager {
         FileConfiguration configuration = this.plugin.getConfig();
         StorageType storageType = StorageType.valueOf(configuration.getString("storage-type", StorageType.SQLITE.name()).toUpperCase());
         DatabaseConfiguration databaseConfiguration = getDatabaseConfiguration(configuration, storageType);
+        var logger = JULogger.from(plugin.getLogger());
 
         DatabaseConnection connection = switch (storageType) {
-            case SQLITE -> new SqliteConnection(databaseConfiguration, this.plugin.getDataFolder());
-            case HIKARICP, MYSQL -> new HikariDatabaseConnection(databaseConfiguration);
+            case SQLITE -> new SqliteConnection(databaseConfiguration, this.plugin.getDataFolder(), logger);
+            case HIKARICP, MYSQL -> new HikariDatabaseConnection(databaseConfiguration, logger);
         };
         if (!connection.isValid()) {
-            plugin.getLogger().severe("Unable to connect to database!");
+            this.plugin.getLogger().severe("Unable to connect to database!");
             Bukkit.getPluginManager().disablePlugin(plugin);
         } else {
             if (storageType == StorageType.SQLITE) {
-                plugin.getLogger().info("The database connection is valid! (SQLITE)");
+                this.plugin.getLogger().info("The database connection is valid! (SQLITE)");
             } else {
-                plugin.getLogger().info("The database connection is valid! (" + connection.getDatabaseConfiguration().getHost() + ")");
+                this.plugin.getLogger().info("The database connection is valid! (" + connection.getDatabaseConfiguration().getHost() + ")");
             }
         }
 
-        this.requestHelper = new RequestHelper(connection, JULogger.from(plugin.getLogger()));
+        this.requestHelper = new RequestHelper(connection, logger);
 
         MigrationManager.setMigrationTableName("zantiautoclick_migrations");
         MigrationManager.registerMigration(new SessionMigration());
         MigrationManager.registerMigration(new InvalidSessionMigration());
 
-        MigrationManager.execute(connection, JULogger.from(plugin.getLogger()));
+        MigrationManager.execute(connection, logger);
     }
 
     /**
@@ -156,9 +147,15 @@ public class StorageManager {
      * <p>
      * This method returns a list of all sessions in the database.
      * </p>
+     * <p>
+     * <b>Warning:</b> This method blocks the calling thread. Use {@link #select(Consumer)}
+     * for asynchronous operations to avoid blocking the main server thread.
+     * </p>
      *
      * @return A list of all sessions in the database.
+     * @deprecated Use {@link #select(Consumer)} for non-blocking operations
      */
+    @Deprecated
     public List<SessionDTO> select() {
         return this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
     }
@@ -172,7 +169,8 @@ public class StorageManager {
      */
     public void clean() {
         this.async(() -> {
-            for (SessionDTO value : select()) {
+            var sessions = this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
+            for (SessionDTO value : sessions) {
                 if (!value.isValid()) {
                     this.requestHelper.delete(Tables.SESSIONS, table -> table.where("id", value.id()));
                 }
@@ -193,6 +191,28 @@ public class StorageManager {
     }
 
     /**
+     * Creates a Session object from a SessionDTO.
+     *
+     * @param dto The SessionDTO to convert.
+     * @return A new Session object.
+     */
+    private Session createSessionFromDTO(SessionDTO dto) {
+        var session = new Session(dto.getUniqueId(), dto.started_at().getTime(), dto.finished_at().getTime(), dto.getDifferences());
+        session.setId(dto.id());
+        return session;
+    }
+
+    /**
+     * Creates an index map of InvalidSessionDTO by session_id for O(1) lookup.
+     *
+     * @param invalidSessions The list of invalid sessions to index.
+     * @return A map with session_id as key and InvalidSessionDTO as value.
+     */
+    private Map<Integer, InvalidSessionDTO> buildInvalidSessionIndex(List<InvalidSessionDTO> invalidSessions) {
+        return invalidSessions.stream().collect(Collectors.toMap(InvalidSessionDTO::session_id, Function.identity(), (a, b) -> a));
+    }
+
+    /**
      * Asynchronously selects all sessions from the database and passes them to a consumer.
      * <p>
      * The consumer is called on a new thread, and the database query is executed asynchronously.
@@ -210,12 +230,15 @@ public class StorageManager {
         var ids = sessions.stream().map(e -> String.valueOf(e.id())).toList();
 
         var invalidSessions = this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereIn("session_id", ids));
+        var invalidSessionIndex = buildInvalidSessionIndex(invalidSessions);
 
         List<ClickSession> clickSessions = new ArrayList<>();
         for (SessionDTO session : sessions) {
-            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
-            clickSession.setId(session.id());
-            invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
+            var clickSession = createSessionFromDTO(session);
+            InvalidSessionDTO invalid = invalidSessionIndex.get(clickSession.getId());
+            if (invalid != null) {
+                clickSession.setInvalidSession(invalid);
+            }
             clickSessions.add(clickSession);
         }
         return clickSessions;
@@ -236,11 +259,14 @@ public class StorageManager {
 
             var sessions = this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
             var invalidSessions = this.requestHelper.selectAll(Tables.INVALID_SESSIONS, InvalidSessionDTO.class);
+            var invalidSessionIndex = buildInvalidSessionIndex(invalidSessions);
 
             for (SessionDTO session : sessions) {
-                var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
-                clickSession.setId(session.id());
-                invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
+                var clickSession = createSessionFromDTO(session);
+                InvalidSessionDTO invalid = invalidSessionIndex.get(clickSession.getId());
+                if (invalid != null) {
+                    clickSession.setInvalidSession(invalid);
+                }
                 playerSessions.computeIfAbsent(session.getUniqueId(), k -> new ArrayList<>()).add(clickSession);
             }
 
@@ -251,15 +277,16 @@ public class StorageManager {
     private void verified(List<InvalidSessionDTO> invalidSessions, Consumer<List<ClickSession>> consumer) {
         var ids = invalidSessions.stream().map(e -> String.valueOf(e.session_id())).toList();
         var sessions = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.whereIn("id", ids));
+        var invalidSessionIndex = buildInvalidSessionIndex(invalidSessions);
 
         List<ClickSession> clickSessions = new ArrayList<>();
         for (SessionDTO session : sessions) {
-            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
-            clickSession.setId(session.id());
-            invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(e -> {
-                clickSession.setInvalidSession(e);
+            var clickSession = createSessionFromDTO(session);
+            InvalidSessionDTO invalid = invalidSessionIndex.get(clickSession.getId());
+            if (invalid != null) {
+                clickSession.setInvalidSession(invalid);
                 clickSessions.add(clickSession);
-            });
+            }
         }
         consumer.accept(clickSessions.stream().sorted(Comparator.comparingLong(ClickSession::getStartedAt).reversed()).toList());
     }

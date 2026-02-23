@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 public class PlayerButton extends SessionHelper {
 
@@ -18,7 +19,7 @@ public class PlayerButton extends SessionHelper {
     }
 
     @Override
-    public void onInventoryOpen(Player player, InventoryEngine inventory, Placeholders placeholders) {
+    public void onInventoryOpen(@NotNull Player player, @NotNull InventoryEngine inventory, @NotNull Placeholders placeholders) {
         super.onInventoryOpen(player, inventory, placeholders);
 
         if (!player.hasMetadata("zaac-player")) return;
@@ -34,7 +35,7 @@ public class PlayerButton extends SessionHelper {
     }
 
     @Override
-    public boolean checkPermission(Player player, InventoryEngine inventory, Placeholders placeholders) {
+    public boolean checkPermission(@NotNull Player player, @NotNull InventoryEngine inventory, @NotNull Placeholders placeholders) {
         return getPaginationSize(player) > 0;
     }
 
