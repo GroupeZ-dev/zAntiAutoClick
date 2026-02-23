@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public class VerifiedInvalidSessionButton extends SessionHelper {
     }
 
     @Override
-    public boolean checkPermission(Player player, InventoryEngine inventory, Placeholders placeholders) {
+    public boolean checkPermission(@NotNull Player player, @NotNull InventoryEngine inventory, @NotNull Placeholders placeholders) {
         return getPaginationSize(player) > 0;
     }
 

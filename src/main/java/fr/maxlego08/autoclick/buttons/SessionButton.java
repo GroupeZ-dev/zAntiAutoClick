@@ -5,6 +5,7 @@ import fr.maxlego08.autoclick.api.utils.Config;
 import fr.maxlego08.menu.api.engine.InventoryEngine;
 import fr.maxlego08.menu.api.utils.Placeholders;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ public class SessionButton extends SessionHelper {
     private final int CLICKS_PER_ITEM = 20;
 
     @Override
-    public void onInventoryOpen(Player player, InventoryEngine inventory, Placeholders placeholders) {
+    public void onInventoryOpen(@NotNull Player player, @NotNull InventoryEngine inventory, @NotNull Placeholders placeholders) {
         super.onInventoryOpen(player, inventory, placeholders);
 
         if (!player.hasMetadata("zaac-session")) return;
@@ -30,7 +31,7 @@ public class SessionButton extends SessionHelper {
     }
 
     @Override
-    public boolean checkPermission(Player player, InventoryEngine inventory, Placeholders placeholders) {
+    public boolean checkPermission(@NotNull Player player, @NotNull InventoryEngine inventory, @NotNull Placeholders placeholders) {
         return getPaginationSize(player) > 0;
     }
 

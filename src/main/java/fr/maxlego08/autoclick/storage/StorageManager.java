@@ -1,7 +1,7 @@
 package fr.maxlego08.autoclick.storage;
 
-import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.Session;
+import fr.maxlego08.autoclick.ZClickPlugin;
 import fr.maxlego08.autoclick.api.ClickSession;
 import fr.maxlego08.autoclick.api.result.AnalyzeResult;
 import fr.maxlego08.autoclick.api.result.SessionResult;
@@ -12,25 +12,14 @@ import fr.maxlego08.autoclick.api.storage.dto.SessionDTO;
 import fr.maxlego08.autoclick.migrations.InvalidSessionMigration;
 import fr.maxlego08.autoclick.migrations.SessionMigration;
 import fr.maxlego08.autoclick.zcore.utils.PlayerInfo;
-import fr.maxlego08.sarah.DatabaseConfiguration;
-import fr.maxlego08.sarah.DatabaseConnection;
-import fr.maxlego08.sarah.HikariDatabaseConnection;
-import fr.maxlego08.sarah.MigrationManager;
-import fr.maxlego08.sarah.RequestHelper;
-import fr.maxlego08.sarah.SqliteConnection;
+import fr.maxlego08.sarah.*;
 import fr.maxlego08.sarah.database.DatabaseType;
 import fr.maxlego08.sarah.logger.JULogger;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -48,29 +37,30 @@ public class StorageManager {
         FileConfiguration configuration = this.plugin.getConfig();
         StorageType storageType = StorageType.valueOf(configuration.getString("storage-type", StorageType.SQLITE.name()).toUpperCase());
         DatabaseConfiguration databaseConfiguration = getDatabaseConfiguration(configuration, storageType);
+        var logger = JULogger.from(plugin.getLogger());
 
         DatabaseConnection connection = switch (storageType) {
-            case SQLITE -> new SqliteConnection(databaseConfiguration, this.plugin.getDataFolder());
-            case HIKARICP, MYSQL -> new HikariDatabaseConnection(databaseConfiguration);
+            case SQLITE -> new SqliteConnection(databaseConfiguration, this.plugin.getDataFolder(), logger);
+            case HIKARICP, MYSQL -> new HikariDatabaseConnection(databaseConfiguration, logger);
         };
         if (!connection.isValid()) {
-            plugin.getLogger().severe("Unable to connect to database!");
+            this.plugin.getLogger().severe("Unable to connect to database!");
             Bukkit.getPluginManager().disablePlugin(plugin);
         } else {
             if (storageType == StorageType.SQLITE) {
-                plugin.getLogger().info("The database connection is valid! (SQLITE)");
+                this.plugin.getLogger().info("The database connection is valid! (SQLITE)");
             } else {
-                plugin.getLogger().info("The database connection is valid! (" + connection.getDatabaseConfiguration().getHost() + ")");
+                this.plugin.getLogger().info("The database connection is valid! (" + connection.getDatabaseConfiguration().getHost() + ")");
             }
         }
 
-        this.requestHelper = new RequestHelper(connection, JULogger.from(plugin.getLogger()));
+        this.requestHelper = new RequestHelper(connection, logger);
 
         MigrationManager.setMigrationTableName("zantiautoclick_migrations");
         MigrationManager.registerMigration(new SessionMigration());
         MigrationManager.registerMigration(new InvalidSessionMigration());
 
-        MigrationManager.execute(connection, JULogger.from(plugin.getLogger()));
+        MigrationManager.execute(connection, logger);
     }
 
     /**

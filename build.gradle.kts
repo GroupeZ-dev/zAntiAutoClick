@@ -54,9 +54,9 @@ allprojects {
 
     dependencies {
         compileOnly("org.spigotmc:spigot-api:1.21.5-R0.1-SNAPSHOT")
-        compileOnly("fr.maxlego08.menu:zmenu-api:b66090d")
+        compileOnly("fr.maxlego08.menu:zmenu-api:1.1.1.0")
         compileOnly("com.github.retrooper:packetevents-spigot:2.8.0")
-        implementation("fr.maxlego08.sarah:sarah:1.18")
+        implementation("fr.maxlego08.sarah:sarah:1.22")
     }
 }
 
