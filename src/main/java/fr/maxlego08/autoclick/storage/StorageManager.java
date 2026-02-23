@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class StorageManager {
@@ -183,6 +184,28 @@ public class StorageManager {
     }
 
     /**
+     * Creates a Session object from a SessionDTO.
+     *
+     * @param dto The SessionDTO to convert.
+     * @return A new Session object.
+     */
+    private Session createSessionFromDTO(SessionDTO dto) {
+        var session = new Session(dto.getUniqueId(), dto.started_at().getTime(), dto.finished_at().getTime(), dto.getDifferences());
+        session.setId(dto.id());
+        return session;
+    }
+
+    /**
+     * Creates an index map of InvalidSessionDTO by session_id for O(1) lookup.
+     *
+     * @param invalidSessions The list of invalid sessions to index.
+     * @return A map with session_id as key and InvalidSessionDTO as value.
+     */
+    private Map<Long, InvalidSessionDTO> buildInvalidSessionIndex(List<InvalidSessionDTO> invalidSessions) {
+        return invalidSessions.stream().collect(Collectors.toMap(InvalidSessionDTO::session_id, Function.identity(), (a, b) -> a));
+    }
+
+    /**
      * Asynchronously selects all sessions from the database and passes them to a consumer.
      * <p>
      * The consumer is called on a new thread, and the database query is executed asynchronously.
@@ -200,12 +223,15 @@ public class StorageManager {
         var ids = sessions.stream().map(e -> String.valueOf(e.id())).toList();
 
         var invalidSessions = this.requestHelper.select(Tables.INVALID_SESSIONS, InvalidSessionDTO.class, table -> table.whereIn("session_id", ids));
+        var invalidSessionIndex = buildInvalidSessionIndex(invalidSessions);
 
         List<ClickSession> clickSessions = new ArrayList<>();
         for (SessionDTO session : sessions) {
-            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
-            clickSession.setId(session.id());
-            invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
+            var clickSession = createSessionFromDTO(session);
+            InvalidSessionDTO invalid = invalidSessionIndex.get(clickSession.getId());
+            if (invalid != null) {
+                clickSession.setInvalidSession(invalid);
+            }
             clickSessions.add(clickSession);
         }
         return clickSessions;
@@ -226,11 +252,14 @@ public class StorageManager {
 
             var sessions = this.requestHelper.selectAll(Tables.SESSIONS, SessionDTO.class);
             var invalidSessions = this.requestHelper.selectAll(Tables.INVALID_SESSIONS, InvalidSessionDTO.class);
+            var invalidSessionIndex = buildInvalidSessionIndex(invalidSessions);
 
             for (SessionDTO session : sessions) {
-                var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
-                clickSession.setId(session.id());
-                invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(clickSession::setInvalidSession);
+                var clickSession = createSessionFromDTO(session);
+                InvalidSessionDTO invalid = invalidSessionIndex.get(clickSession.getId());
+                if (invalid != null) {
+                    clickSession.setInvalidSession(invalid);
+                }
                 playerSessions.computeIfAbsent(session.getUniqueId(), k -> new ArrayList<>()).add(clickSession);
             }
 
@@ -241,15 +270,16 @@ public class StorageManager {
     private void verified(List<InvalidSessionDTO> invalidSessions, Consumer<List<ClickSession>> consumer) {
         var ids = invalidSessions.stream().map(e -> String.valueOf(e.session_id())).toList();
         var sessions = this.requestHelper.select(Tables.SESSIONS, SessionDTO.class, table -> table.whereIn("id", ids));
+        var invalidSessionIndex = buildInvalidSessionIndex(invalidSessions);
 
         List<ClickSession> clickSessions = new ArrayList<>();
         for (SessionDTO session : sessions) {
-            var clickSession = new Session(session.getUniqueId(), session.started_at().getTime(), session.finished_at().getTime(), session.getDifferences());
-            clickSession.setId(session.id());
-            invalidSessions.stream().filter(e -> e.session_id() == clickSession.getId()).findFirst().ifPresent(e -> {
-                clickSession.setInvalidSession(e);
+            var clickSession = createSessionFromDTO(session);
+            InvalidSessionDTO invalid = invalidSessionIndex.get(clickSession.getId());
+            if (invalid != null) {
+                clickSession.setInvalidSession(invalid);
                 clickSessions.add(clickSession);
-            });
+            }
         }
         consumer.accept(clickSessions.stream().sorted(Comparator.comparingLong(ClickSession::getStartedAt).reversed()).toList());
     }
