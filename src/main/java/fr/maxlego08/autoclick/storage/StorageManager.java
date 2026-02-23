@@ -208,7 +208,7 @@ public class StorageManager {
      * @param invalidSessions The list of invalid sessions to index.
      * @return A map with session_id as key and InvalidSessionDTO as value.
      */
-    private Map<Long, InvalidSessionDTO> buildInvalidSessionIndex(List<InvalidSessionDTO> invalidSessions) {
+    private Map<Integer, InvalidSessionDTO> buildInvalidSessionIndex(List<InvalidSessionDTO> invalidSessions) {
         return invalidSessions.stream().collect(Collectors.toMap(InvalidSessionDTO::session_id, Function.identity(), (a, b) -> a));
     }
 
