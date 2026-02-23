@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "fr.maxlego08.autoclick"
-version = "1.0.2"
+version = "1.0.3"
 
 extra.set("targetFolder", file("target/"))
 extra.set("apiFolder", file("target-api/"))
