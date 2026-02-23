@@ -83,10 +83,14 @@ public class SessionManager extends ZUtils implements Listener {
                         this.plugin.getLogger().info("La session de " + uuid + " (id: " + session.getId() + ") est considéré comme une session d'auto-click.");
                         storage.insertInvalidSession(session, sessionResult, analyzeResult, invalidSession -> {
                             session.setInvalidSession(invalidSession);
-                            this.sendActions(Config.endCheatSessionActions, player, session);
+                            if (player != null && player.isOnline()) {
+                                this.sendActions(Config.endCheatSessionActions, player, session);
+                            }
                         });
                     } else {
-                        this.sendActions(Config.endSessionActions, player, session);
+                        if (player != null && player.isOnline()) {
+                            this.sendActions(Config.endSessionActions, player, session);
+                        }
                     }
                 });
             });
