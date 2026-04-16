@@ -35,14 +35,13 @@ public class SessionManager extends ZUtils implements Listener {
 
     public SessionManager(ZClickPlugin plugin) {
         this.plugin = plugin;
-        this.startCleanupTask();
     }
 
     /**
      * Démarre une tâche périodique pour nettoyer les sessions abandonnées.
      * Cela évite les fuites mémoire si une session n'est jamais terminée correctement.
      */
-    private void startCleanupTask() {
+    void startCleanupTask() {
         this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
             long now = System.currentTimeMillis();
 

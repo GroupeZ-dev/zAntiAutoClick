@@ -55,6 +55,7 @@ public final class ZClickPlugin extends ZPlugin implements ClickPlugin {
 
         this.storageManager.loadDatabase();
         this.getServer().getPluginManager().registerEvents(this.sessionManager, this);
+        this.sessionManager.startCleanupTask();
 
         this.commandManager.registerCommand(this, "zantiautoclicks", new CommandAntiAutoClick(this), List.of("zaac"));
 
