@@ -20,6 +20,7 @@ import fr.maxlego08.menu.api.InventoryManager;
 import fr.maxlego08.menu.api.exceptions.InventoryException;
 import fr.maxlego08.menu.api.loader.NoneLoader;
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
+import dev.faststats.bukkit.BukkitContext;
 
 import java.util.List;
 
@@ -29,6 +30,9 @@ public final class ZClickPlugin extends ZPlugin implements ClickPlugin {
     private final SessionManager sessionManager = new SessionManager(this);
     private final CommandManager commandManager = new CommandManager(this);
     private final MessageLoader messageLoader = new MessageLoader(this);
+    private final BukkitContext context = new BukkitContext.Factory(this, "788286f4db700ca0579918a9462568c6")
+            .metrics(dev.faststats.Metrics.Factory::create)
+            .create();
 
     private InventoryManager inventoryManager;
     private ButtonManager buttonManager;
@@ -60,6 +64,7 @@ public final class ZClickPlugin extends ZPlugin implements ClickPlugin {
         this.commandManager.registerCommand(this, "zantiautoclicks", new CommandAntiAutoClick(this), List.of("zaac"));
 
         new Metrics(this, 25641);
+        context.ready();
 
         this.loadButtons();
         this.loadInventories();
@@ -70,6 +75,7 @@ public final class ZClickPlugin extends ZPlugin implements ClickPlugin {
     @Override
     public void onDisable() {
         PacketEvents.getAPI().terminate();
+        context.shutdown();
     }
 
     public StorageManager getStorageManager() {
