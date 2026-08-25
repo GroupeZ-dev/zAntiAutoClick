@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "fr.maxlego08.autoclick"
-version = "1.0.3"
+version = "1.0.4"
 
 extra.set("targetFolder", file("target/"))
 extra.set("apiFolder", file("target-api/"))
@@ -34,6 +34,10 @@ allprojects {
         }
         maven(url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
         maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
+        maven {
+            name = "faststatsReleases"
+            url = uri("https://repo.faststats.dev/releases")
+        }
     }
 
     java {
@@ -56,7 +60,8 @@ allprojects {
         compileOnly("org.spigotmc:spigot-api:1.21.5-R0.1-SNAPSHOT")
         compileOnly("fr.maxlego08.menu:zmenu-api:1.1.1.0")
         compileOnly("com.github.retrooper:packetevents-spigot:2.8.0")
-        implementation("fr.maxlego08.sarah:sarah:1.22")
+        implementation("fr.maxlego08.sarah:sarah:1.23")
+        implementation("dev.faststats.metrics:bukkit:0.29.4")
     }
 }
 
@@ -73,7 +78,8 @@ dependencies {
 tasks {
     shadowJar {
 
-        relocate("fr.maxlego08.sarah", "fr.maxlego08.autoclick.libs")
+        relocate("fr.maxlego08.sarah", "fr.maxlego08.autoclick.libs.sarah")
+        relocate("dev.faststats", "fr.maxlego08.autoclick.libs.faststats")
 
         rootProject.extra.properties["sha"]?.let { sha ->
             archiveClassifier.set("${rootProject.extra.properties["classifier"]}-${sha}")

@@ -1,6 +1,12 @@
 # Changelog
 
-## [1.0.3] - 2025-02-23
+# [1.0.4] - 2026-08-25
+
+- Added faststats metrics
+- Fixed load errors
+- Updated to Sarah 1.23
+
+## [1.0.3] - 2026-02-23
 
 ### Fixed
 - Fixed NPE when player disconnects during session analysis
